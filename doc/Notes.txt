@@ -1,0 +1,8 @@
+To run the Seller
+
+-gui seller:jade.examples.bookTrading.BookSellerAgent
+
+
+To run the Buyer
+
+-container buyer:jade.examples.bookTrading.BookBuyerAgent("lord of the rings")
