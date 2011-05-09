@@ -1,8 +1,17 @@
+To run the container
+
+-gui -host localhost -port 9001
+
+
 To run the Seller
 
 -gui seller:jade.examples.bookTrading.BookSellerAgent
+
+-container -local-host localhost -port 9001  seller:jade.examples.bookTrading.BookSellerAgent
 
 
 To run the Buyer
 
 -container buyer:jade.examples.bookTrading.BookBuyerAgent("lord of the rings")
+
+-container -local-host localhost -port 9001  buyer:jade.examples.bookTrading.BookBuyerAgent("lord of the rings")
