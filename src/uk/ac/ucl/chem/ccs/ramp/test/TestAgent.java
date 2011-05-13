@@ -9,6 +9,7 @@
  */
 package uk.ac.ucl.chem.ccs.ramp.test;
 
+import java.util.Date;
 import java.util.Iterator;
 import jade.core.Agent;
 
@@ -25,7 +26,8 @@ public class TestAgent extends Agent {
 		
 	}
 	
-	protected void takeDown() {
-		System.out.println("Agent " + getAID().getName() + " terminated");
-	}
+	
+
+	
+	
 }
