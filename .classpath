@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/peersim-doclet.jar"/>
 	<classpathentry kind="lib" path="lib/jade.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec/commons-codec-1.3.jar"/>
+	<classpathentry kind="con" path="SWT_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

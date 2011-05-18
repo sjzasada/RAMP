@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.realitygrid.org/AHE/RFQ" xmlns="http://www.realitygrid.org/AHE/RFQ" elementFormDefault="qualified">
+  <xs:element name="RequestForQuotation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Request" minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CPUHourCost" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+              <xs:element name="EndDate" type="xs:date" maxOccurs="1" minOccurs="1"/>
+              <xs:element name="EndTime" type="xs:time" maxOccurs="1" minOccurs="1"/>
+              <xs:element name="StartDate" type="xs:date" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="StartTime" type="xs:time" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="OperatingSystem" maxOccurs="1" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Unknown"/>
+                    <xs:enumeration value="MACOS"/>
+                    <xs:enumeration value="ATTUNIX"/>
+                    <xs:enumeration value="DGUX"/>
+                    <xs:enumeration value="DECNT"/>
+                    <xs:enumeration value="Tru64_UNIX"/>
+                    <xs:enumeration value="OpenVMS"/>
+                    <xs:enumeration value="HPUX"/>
+                    <xs:enumeration value="AIX"/>
+                    <xs:enumeration value="MVS"/>
+                    <xs:enumeration value="OS400"/>
+                    <xs:enumeration value="OS_2"/>
+                    <xs:enumeration value="JavaVM"/>
+                    <xs:enumeration value="MSDOS"/>
+                    <xs:enumeration value="WIN3x"/>
+                    <xs:enumeration value="WIN95"/>
+                    <xs:enumeration value="WIN98"/>
+                    <xs:enumeration value="WINNT"/>
+                    <xs:enumeration value="WINCE"/>
+                    <xs:enumeration value="NCR3000"/>
+                    <xs:enumeration value="NetWare"/>
+                    <xs:enumeration value="OSF"/>
+                    <xs:enumeration value="DC_OS"/>
+                    <xs:enumeration value="Reliant_UNIX"/>
+                    <xs:enumeration value="SCO_UnixWare"/>
+                    <xs:enumeration value="SCO_OpenServer"/>
+                    <xs:enumeration value="Sequent"/>
+                    <xs:enumeration value="IRIX"/>
+                    <xs:enumeration value="Solaris"/>
+                    <xs:enumeration value="SunOS"/>
+                    <xs:enumeration value="U6000"/>
+                    <xs:enumeration value="ASERIES"/>
+                    <xs:enumeration value="TandemNSK"/>
+                    <xs:enumeration value="TandemNT"/>
+                    <xs:enumeration value="BS2000"/>
+                    <xs:enumeration value="LINUX"/>
+                    <xs:enumeration value="Lynx"/>
+                    <xs:enumeration value="XENIX"/>
+                    <xs:enumeration value="VM"/>
+                    <xs:enumeration value="Interactive_UNIX"/>
+                    <xs:enumeration value="BSDUNIX"/>
+                    <xs:enumeration value="FreeBSD"/>
+                    <xs:enumeration value="NetBSD"/>
+                    <xs:enumeration value="GNU_Hurd"/>
+                    <xs:enumeration value="OS9"/>
+                    <xs:enumeration value="MACH_Kernel"/>
+                    <xs:enumeration value="Inferno"/>
+                    <xs:enumeration value="QNX"/>
+                    <xs:enumeration value="EPOC"/>
+                    <xs:enumeration value="IxWorks"/>
+                    <xs:enumeration value="VxWorks"/>
+                    <xs:enumeration value="MiNT"/>
+                    <xs:enumeration value="BeOS"/>
+                    <xs:enumeration value="HP_MPE"/>
+                    <xs:enumeration value="NextStep"/>
+                    <xs:enumeration value="PalmPilot"/>
+                    <xs:enumeration value="Rhapsody"/>
+                    <xs:enumeration value="Windows_2000"/>
+                    <xs:enumeration value="Dedicated"/>
+                    <xs:enumeration value="OS_390"/>
+                    <xs:enumeration value="VSE"/>
+                    <xs:enumeration value="TPF"/>
+                    <xs:enumeration value="Windows_R_Me"/>
+                    <xs:enumeration value="Caldera_Open_UNIX"/>
+                    <xs:enumeration value="OpenBSD"/>
+                    <xs:enumeration value="Not_Applicable"/>
+                    <xs:enumeration value="Windows_XP"/>
+                    <xs:enumeration value="z_OS"/>
+                    <xs:enumeration value="other"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="OSVersion" type="xs:string" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="Architecture" maxOccurs="1" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="sparc"/>
+                    <xs:enumeration value="powerpc"/>
+                    <xs:enumeration value="x86"/>
+                    <xs:enumeration value="x86_32"/>
+                    <xs:enumeration value="x86_64"/>
+                    <xs:enumeration value="parisc"/>
+                    <xs:enumeration value="mips"/>
+                    <xs:enumeration value="ia64"/>
+                    <xs:enumeration value="arm"/>
+                    <xs:enumeration value="other"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CPUSpeed" type="xs:integer" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="WallTime" type="xs:integer" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="InterNodeBandwidth" type="xs:integer" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="RAMPerCore" type="xs:integer" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="Disk" maxOccurs="1" minOccurs="0">
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="TotalDiskSpace" type="xs:integer"/>
+                    <xs:element name="NodeDiskSpace" type="xs:integer"/>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Cores" maxOccurs="1" minOccurs="1">
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="TotalCores" type="xs:integer"/>
+                    <xs:element name="Nodes">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="NodeCount" type="xs:integer"/>
+                          <xs:element name="NodeCores" type="xs:integer"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
