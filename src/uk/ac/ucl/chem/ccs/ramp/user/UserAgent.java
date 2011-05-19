@@ -14,6 +14,8 @@ import java.util.Vector;
 
 import java.util.Iterator;
 
+import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -28,8 +30,10 @@ import jade.lang.acl.MessageTemplate;
 public class UserAgent extends Agent {
 
 	private Vector resourceAgents = new Vector();
-	
+		
 	protected void setup () {
+		
+		// print out agent details
 		System.out.println("My name is " + getAID().getLocalName());
 		System.out.println("My GUID is " + getAID().getName());
 		System.out.println("My addresses are:");
@@ -38,17 +42,8 @@ public class UserAgent extends Agent {
 			System.out.println("- " +it.next());
 		}
 		
-		Object args[] = getArguments();
-		int coreCount = Integer.parseInt((String)args[0]);
-		int maxPrice = Integer.parseInt((String)args[1]);
 		
-		long deadline = System.currentTimeMillis() + 240000;
-		
-		Date finish = new Date(deadline);
-		
-		
-		System.out.println("Looking to buy " + coreCount + " cores for less than " + maxPrice + " before " + finish);
-		
+
 		//check for resource agents
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			protected void onTick () {
@@ -69,33 +64,88 @@ public class UserAgent extends Agent {
 				}
 		});
 		
-		requestQuote(coreCount, maxPrice, finish);
+		// get the args to the prog - should be 1
+		Object args[] = getArguments();
+		
+		if (args.length == 1) {
+		
+			Request myRequest = new Request((String)args[0]);	
+			System.out.println("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
+	
+			requestQuote(myRequest);
+	
+		}
 		
 	}
 	
+	//this is what happens when the agent finishes
 	protected void takeDown() {
 		System.out.println("Agent " + getAID().getName() + " terminated");
 	}
 
-	
-	public void requestQuote (int coreCount, int maxPrice, Date deadline) {
-		addBehaviour(new RequestManager (this, coreCount, maxPrice, deadline));	
+	//method to begin a negotiation
+	public void requestQuote (Request r) {
+		addBehaviour(new RequestAQuote(this, r));
 	}
 		
+	
+	//behaviour to hold all data associated with this request
+	private class RequestAQuote extends Behaviour {
 		
+		boolean done;
+		
+		private Request currentRequest;
+		private Agent a;
+		
+		private Vector quotes;
+		private AID bestSeller;
+		private int bestPrice; 
+		
+		private RequestAQuote (Agent a, Request r) {
+			quotes = new Vector();
+			this.a = a;
+			currentRequest = r;
+		}
+		
+		
+		public boolean done() {
+			return done;
+		}
+
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			RequestManager requester = new RequestManager (a, currentRequest);
+			addBehaviour(requester);
+			
+			//wait until the requester is done, then once it is, notify winners
+			if (!requester.done()) {
+				block();
+			} else {
+				myAgent.addBehaviour(new ResourceNotifier(this));
+			}
+			
+		}
+		
+	}
+	
+	
+	
+	
+		//keep requesting until deadline
 		private class RequestManager extends TickerBehaviour {
 			
-			private int coreCount;
-			private int maxPrice;
 			private long deadline, initTime, deltaT;
 			
-			private RequestManager (Agent a, int c, int p, Date d) {
+			private Request r;
+			
+			private RequestManager (Agent a, Request r) {
 				super (a, 30000);
-				coreCount = c;
-				maxPrice = p;
-				deadline = d.getTime();
+				deadline = System.currentTimeMillis() + 240000;
 				initTime = System.currentTimeMillis();
 				deltaT=deadline - initTime;
+				this.r=r;
 			}
 			
 			public void onTick () {
@@ -104,31 +154,29 @@ public class UserAgent extends Agent {
 				if (currentTime > deadline) {
 					stop();
 				} else {
-					
-					myAgent.addBehaviour(new ResourceNegotiator(maxPrice, coreCount, this));
+					myAgent.addBehaviour(new ResourceNegotiator(r, this));
 				}
 				
 			}
 			
 		}
 	
+		
+		//this behaviour opens up negotiations
 		private class ResourceNegotiator extends Behaviour {
 			
-			private int coreCount;
-			private int maxPrice;
 			private RequestManager parent;
-			
+			private RequestAQuote raq;
+			private Request rq;
 			private int step = 0;
 			private int repliesCount = 0;
 			
-			private AID bestSeller;
-			private int bestPrice;
 						
 			private MessageTemplate mt;
 			
-			ResourceNegotiator (int m, int p, RequestManager r) {
-				coreCount = p;
-				maxPrice = m;
+			ResourceNegotiator (Request rq, RequestManager r, RequestAQuote raq) {
+				this.raq=raq;
+				this.rq=rq;
 				parent = r;
 			}
 			
@@ -146,7 +194,7 @@ public class UserAgent extends Agent {
 						cfp.addReceiver(it.next());
 					}
 					
-					System.out.println("Pollsing sellers");
+					System.out.println("Polling sellers");
 					
 					cfp.setContent(Integer.toString(coreCount));
 					cfp.setConversationId("compute-negotiation");
