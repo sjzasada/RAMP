@@ -59,7 +59,7 @@ public class ResourceAgent extends Agent {
 		System.out.println("Selling for less than " + minPrice);
 		
 		addBehaviour(new RFQResponseServer());
-		//addBehaviour(new ReservationServer());
+		addBehaviour(new PurchaseOrdersServer());
 		
 		
 	}
@@ -109,5 +109,24 @@ public class ResourceAgent extends Agent {
 		}
 	}
 	
+	private class PurchaseOrdersServer extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// ACCEPT_PROPOSAL Message received. Process it
+				String price = msg.getContent();
+				ACLMessage reply = msg.createReply();
+
+				reply.setPerformative(ACLMessage.INFORM);
+				System.out.println("Made deal with agent "+msg.getSender().getName() + " for " + price);
+				
+				myAgent.send(reply);
+			}
+			else {
+				block();
+			}
+		}
+	} 
 	
 }
