@@ -9,6 +9,7 @@
  */
 package uk.ac.ucl.chem.ccs.ramp.user;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import java.util.Iterator;
+
+import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
 
@@ -34,20 +38,50 @@ import jade.lang.acl.MessageTemplate;
 public class UserAgent extends Agent {
 
 	private Vector resourceAgents = new Vector();
-		
+	UserGui myGui=null;
+	
 	protected void setup () {
 		
-		// print out agent details
-		System.out.println("My name is " + getAID().getLocalName());
-		System.out.println("My GUID is " + getAID().getName());
-		System.out.println("My addresses are:");
-		Iterator<String> it = getAID().getAllAddresses();
-		while (it.hasNext()) {
-			System.out.println("- " +it.next());
+		
+		// get the args to the prog - should be 1
+		Object args[] = getArguments();
+		
+		
+		// if the argument is a directory, open a GUI, else open the file;
+		if (args.length == 1) {
+		
+			String argument=(String)args[0];
+			
+			File f = new File(argument);
+			if (f.isDirectory()) {
+				
+				myGui=new UserGui(this);
+				myGui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				myGui.setVisible(true);
+				myGui.loadDir(argument);
+				
+			} else {
+			
+				Request myRequest = new Request();	
+				displayMessage("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
+	
+				requestQuote(myRequest);
+			}
+		} else {
+			myGui=new UserGui(this);
+			myGui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			myGui.setVisible(true);
 		}
 		
+		// print out agent details
+		displayMessage("My name is " + getAID().getLocalName());
+		displayMessage("My GUID is " + getAID().getName());
+		displayMessage("My addresses are:");
+		Iterator<String> it = getAID().getAllAddresses();
+		while (it.hasNext()) {
+			displayMessage("- " +it.next());
+		}
 		
-
 		//check for resource agents
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			protected void onTick () {
@@ -68,23 +102,31 @@ public class UserAgent extends Agent {
 				}
 		});
 		
-		// get the args to the prog - should be 1
-		Object args[] = getArguments();
+
 		
-		if (args.length == 1) {
-		
-			Request myRequest = new Request((String)args[0]);	
-			System.out.println("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
-	
-			requestQuote(myRequest);
-	
-		}
 		
 	}
+	
+	
+	//display a message from the agent
+	public void displayMessage (final String s) {
+		if (myGui != null) {
+			Runnable addIt = new Runnable () {
+				public void run() {
+					myGui.writeMessage(s);
+				}
+			};
+			SwingUtilities.invokeLater(addIt);
+		} else {
+			System.out.println(s);
+		}
+	}
+	
 	
 	//this is what happens when the agent finishes
 	protected void takeDown() {
 		System.out.println("Agent " + getAID().getName() + " terminated");
+		this.doDelete();
 	}
 
 	//method to begin a negotiation
@@ -135,7 +177,7 @@ public class UserAgent extends Agent {
 			
 			//wait until the requester is done, then once it is, notify winners
 			if (!deadlineReached) {
-				System.out.println("Deadline not reached");
+				displayMessage("Deadline not reached");
 				block();
 			} else {
 				myAgent.addBehaviour(new ResourceNotifier(this));
@@ -170,13 +212,13 @@ public class UserAgent extends Agent {
 				long currentTime = System.currentTimeMillis();
 				
 				if (currentTime > deadline) {
-					System.out.println("Deadline passed, stopping requesting");
+					displayMessage("Deadline passed, stopping requesting");
 					raq.deadlineReached=true;
 					raq.restart();
 					stop();
 				} else {
-					System.out.println("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
-					System.out.println("Bidding round " + ++raq.round);
+					displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
+					displayMessage("Bidding round " + ++raq.round);
 					
 					// add a behaviour to start negotiations
 					myAgent.addBehaviour(new ResourceNegotiator(r, this, raq));
@@ -222,7 +264,7 @@ public class UserAgent extends Agent {
 						cfp.addReceiver(it.next());
 					}
 					
-					System.out.println("Polling sellers");
+					displayMessage("Polling sellers");
 					
 					//TODO: make the message more comprehensive
 					
@@ -259,7 +301,7 @@ public class UserAgent extends Agent {
 								raq.bestSeller = reply.getSender();
 							}
 						
-							System.out.println("Recieved price " + price + " from " + reply.getSender());
+							displayMessage("Recieved price " + price + " from " + reply.getSender());
 							
 						}
 						repliesCount++;
@@ -312,13 +354,13 @@ public class UserAgent extends Agent {
 				Iterator<Offer> itr = coll.iterator();
 				while (itr.hasNext()) {
 					Offer o = (Offer)itr.next();
-					System.out.println(o);
+					displayMessage(o.toString());
 				}
 				
 					
 				if (raq.bestSeller != null) {
 					//TODO: implement the offer evaluation
-					System.out.println("Accepting offer from " + raq.bestSeller);
+					displayMessage("Accepting offer from " + raq.bestSeller);
 					
 					AID winner = raq.bestSeller;
 					Offer offer = raq.quotes.get(winner);
@@ -332,7 +374,7 @@ public class UserAgent extends Agent {
 					 mt = MessageTemplate.and(MessageTemplate.MatchConversationId(offer.getConversation()), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 					step=2;
 				} else {
-					System.out.println("No bids received");
+					displayMessage("No bids received");
 					step=3;
 				}
 				break;
@@ -344,9 +386,9 @@ public class UserAgent extends Agent {
 					if(reply != null) {
 						if (reply.getPerformative() == ACLMessage.INFORM) {
 							//sucessfully made the bargin
-							System.out.println("Done!");
+							displayMessage("Done!");
 						} else {
-							System.out.println("Not successful");
+							displayMessage("Not successful");
 						}
 						
 						step=3;

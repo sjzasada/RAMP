@@ -117,6 +117,8 @@ public class ResourceAgent extends Agent {
 				// ACCEPT_PROPOSAL Message received. Process it
 				String price = msg.getContent();
 				ACLMessage reply = msg.createReply();
+				reply.setConversationId(msg.getConversationId());
+				reply.setInReplyTo(msg.getInReplyTo());
 
 				reply.setPerformative(ACLMessage.INFORM);
 				System.out.println("Made deal with agent "+msg.getSender().getName() + " for " + price);
