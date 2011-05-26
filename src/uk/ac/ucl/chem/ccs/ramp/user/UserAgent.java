@@ -27,6 +27,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -126,7 +127,7 @@ public class UserAgent extends Agent {
 	//this is what happens when the agent finishes
 	protected void takeDown() {
 		System.out.println("Agent " + getAID().getName() + " terminated");
-		this.doDelete();
+	//	this.doDelete();
 	}
 
 	//method to begin a negotiation
@@ -144,7 +145,7 @@ public class UserAgent extends Agent {
 	//behaviour to hold all data associated with this request
 	private class RequestAQuote extends Behaviour {
 		
-		boolean done=false;
+		boolean first=false;
 		
 		private Request currentRequest;
 		private Agent a;
@@ -152,38 +153,42 @@ public class UserAgent extends Agent {
 		private HashMap<AID, Offer> quotes;
 		private AID bestSeller;
 		private int bestPrice; 
-		private RequestManager requester;
-		private boolean deadlineReached = false;
+		private SequentialBehaviour twoStep;
 		
 		private RequestAQuote (Agent a, Request r) {
-			quotes = new HashMap();
+			quotes = new HashMap<AID, Offer>();
 			this.a = a;
 			currentRequest = r;
-			requester = new RequestManager (a, currentRequest, this);
-			addBehaviour(requester);
+	
+			
+			twoStep = new SequentialBehaviour (a);
+
+
+			
 		
 		}
 		
 		
 		public boolean done() {
-			return done;
+			return twoStep.done();
 		}
 
 
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-
+			if (!first) {
+				displayMessage("Starting twostep behaviour");
+				twoStep.addSubBehaviour(new RequestManager (a, currentRequest, this));
+				twoStep.addSubBehaviour(new ResourceNotifier(this));
+				addBehaviour(twoStep);
+				first=true;
+			} else {
 			
 			//wait until the requester is done, then once it is, notify winners
-			if (!deadlineReached) {
-				displayMessage("Deadline not reached");
+
 				block();
-			} else {
-				myAgent.addBehaviour(new ResourceNotifier(this));
-				done=true;
 			}
-			
 		}
 		
 	}
@@ -213,8 +218,6 @@ public class UserAgent extends Agent {
 				
 				if (currentTime > deadline) {
 					displayMessage("Deadline passed, stopping requesting");
-					raq.deadlineReached=true;
-					raq.restart();
 					stop();
 				} else {
 					displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
@@ -290,10 +293,12 @@ public class UserAgent extends Agent {
 							int price = Integer.parseInt(reply.getContent());
 							
 							
+							String conversation = reply.getConversationId();
+							
 							//add this offer to the hash table										
-							raq.quotes.put(responder, new Offer(responder, price, reply.getConversationId()));
+							raq.quotes.put(responder, new Offer(responder, price, conversation));
 							
-							
+							System.err.println("Conversation " + conversation);
 							
 							
 							if (raq.bestSeller == null || price < raq.bestPrice) {
@@ -362,14 +367,25 @@ public class UserAgent extends Agent {
 					//TODO: implement the offer evaluation
 					displayMessage("Accepting offer from " + raq.bestSeller);
 					
+					
+					
 					AID winner = raq.bestSeller;
 					Offer offer = raq.quotes.get(winner);
+					
+					if (offer == null) {
+						System.err.println("found in hash map");
+					}
 					
 					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 					 order.addReceiver(winner);
 					 order.setContent(Integer.toString(offer.price));
+					 order.setReplyWith("order"+System.currentTimeMillis());
 					 order.setConversationId(offer.getConversation());
 					 myAgent.send(order);
+					 
+					 System.err.println(offer.getPrice());
+					 System.err.println(offer.getConversation());
+					 System.err.println(order.getReplyWith());
 					 
 					 mt = MessageTemplate.and(MessageTemplate.MatchConversationId(offer.getConversation()), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 					step=2;
@@ -383,7 +399,11 @@ public class UserAgent extends Agent {
 					
 					ACLMessage reply = myAgent.receive(mt);
 					
+				
+					
 					if(reply != null) {
+						System.err.println("case 2 reached");
+						
 						if (reply.getPerformative() == ACLMessage.INFORM) {
 							//sucessfully made the bargin
 							displayMessage("Done!");
@@ -394,6 +414,7 @@ public class UserAgent extends Agent {
 						step=3;
 					} else {
 						block();
+						System.err.println("blocking");
 					}
 					break;
 					

@@ -20,7 +20,7 @@ public class Offer {
 	 * @param agent
 	 * @param price
 	 */
-	public Offer(AID agent, int price, String coversation) {
+	public Offer(AID agent, int price, String conversation) {
 		this.agent = agent;
 		this.price = price;
 		this.conversation = conversation;

@@ -7,7 +7,7 @@
  * 
  * TODO: 
  */
-package uk.ac.ucl.chem.ccs.ramp.maket;
+package uk.ac.ucl.chem.ccs.ramp.market;
 
 import jade.core.Agent;
 
