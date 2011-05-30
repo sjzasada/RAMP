@@ -28,8 +28,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 public class Request {
 
-	ObjectFactory of;
-	RequestForQuotation rfq;
+	private ObjectFactory of;
+	private RequestForQuotation rfq;
+	private String requestID;
+	
+	
+
+	public String getRequestID() {
+		return requestID;
+	}
+
+
+
+	public void setRequestID(String requestID) {
+		this.requestID = requestID;
+	}
+
 
 
 	public Request () {

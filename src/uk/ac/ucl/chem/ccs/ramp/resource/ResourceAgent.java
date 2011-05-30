@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
+import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
+import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
+import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
+
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -27,7 +31,9 @@ import jade.lang.acl.MessageTemplate;
 public class ResourceAgent extends Agent {
 
 	private Map offers = new HashMap();
-	int minPrice;
+	private int minPrice;
+	private ResourceInterface resInter;
+	
 	
 	protected void setup () {
 		System.out.println("My name is " + getAID().getLocalName());
@@ -57,6 +63,11 @@ public class ResourceAgent extends Agent {
 	
 		
 		System.out.println("Selling for less than " + minPrice);
+		
+		
+		//TODO: Make interface use user configurable
+		resInter = new TestInterface();
+		
 		
 		addBehaviour(new RFQResponseServer());
 		addBehaviour(new PurchaseOrdersServer());
@@ -89,10 +100,8 @@ public class ResourceAgent extends Agent {
 				ACLMessage reply = msg.createReply();
 				
 				//decide whether to reply
-				Random generator = new Random();
-				float prob = generator.nextFloat();
 				
-				if (prob > 0.5) {
+				if (resInter.canSatisfy(new Request())) {
 					// we can respond
 					reply.setPerformative(ACLMessage.PROPOSE);
 					reply.setContent(String.valueOf(minPrice));

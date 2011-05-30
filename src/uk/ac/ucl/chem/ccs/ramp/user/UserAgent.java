@@ -134,7 +134,11 @@ public class UserAgent extends Agent {
 	public void requestQuote (Request r) {
 		addBehaviour(new RequestAQuote(this, r));
 	}
+	
+	public void requestQuote (Vector<Request> v) {
 		
+	}
+	
 	////////////////////////////////////////
 	//
 	// behaviours

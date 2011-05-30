@@ -111,9 +111,27 @@ public class UserGui extends JFrame {
 			btnPurchase.setBounds(107, 0, 87, 30);
 			btnPurchase.addActionListener(new ActionListener () {
 				public void actionPerformed (ActionEvent e) {
-					int index = table.getSelectedRow();
 					
-					if (index > -1) {
+					
+					if (table.getSelectedRowCount() > 1) {
+						
+						int index[] = table.getSelectedRows();
+						
+						
+						//do this if more than one row is selected
+						Vector<Request> vec = new Vector<Request>();
+						
+						for (int i=0; i<index.length; i++) {
+							vec.add(loadedRequests.elementAt(index[i]));
+						}
+						
+						if (myAgent != null) {
+							myAgent.requestQuote(vec);
+						}
+						
+					} else if (table.getSelectedRowCount() == 1) {
+						
+						int index = table.getSelectedRow();
 						
 						Request req = loadedRequests.get(index);
 						
@@ -122,6 +140,8 @@ public class UserGui extends JFrame {
 						}
 						
 					}
+					
+
 				}
 			});
 			
