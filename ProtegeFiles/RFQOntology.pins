@@ -1,0 +1,41 @@
+; Thu Jun 09 15:40:50 BST 2011
+; 
+;+ (version "3.4.6")
+;+ (build "Build 613")
+
+([Cancel] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([Cores] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([Cost] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([Offer] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([project+annotation] of  %3APROJECT-ANNOTATION
+
+	(%3AONTOLOGYNAME "Market")
+	(%3APACKAGE "uk.ac.ucl.chem.ccs.ramp.rfq.onto"))
+
+([Request] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([Reschedule] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([Resource] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([RFQ] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
