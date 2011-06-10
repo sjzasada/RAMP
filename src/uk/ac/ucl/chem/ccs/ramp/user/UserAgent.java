@@ -38,6 +38,11 @@ import jade.lang.acl.MessageTemplate;
 
 public class UserAgent extends Agent {
 
+	
+	
+	//Hash containing a hash of all of the offers made for a particular RequestID
+	private HashMap<String, HashMap<AID, Offer>> Offers = new HashMap<String, HashMap<AID, Offer>>();
+	
 	private Vector resourceAgents = new Vector();
 	UserGui myGui=null;
 	
