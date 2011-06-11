@@ -6,11 +6,11 @@ import jade.content.schema.*;
 
 /** file: MarketOntology.java
  * @author OntologyBeanGenerator v4.1
- * @version 2011/06/9, 15:37:32
+ * @version 2011/06/11, 21:40:02
  */
 public class MarketOntology extends jade.content.onto.Ontology  {
 
-  private static final long serialVersionUID = 2389062215155035045L;
+  private static final long serialVersionUID = -1439939741134496089L;
 
   //NAME
   public static final String ONTOLOGY_NAME = "Market";
@@ -33,15 +33,18 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     public static final String COST_NOTBEFORE="NOTBEFORE";
     public static final String COST_DEADLINE="DEADLINE";
     public static final String COST="Cost";
+    public static final String OFFER_OFFERID="OFFERID";
+    public static final String OFFER_OFFERCOST="OFFERCOST";
+    public static final String OFFER="Offer";
     public static final String RFQ_REQUESTID="REQUESTID";
     public static final String RFQ_COST="COST";
     public static final String RFQ="RFQ";
     public static final String CANCEL_CANCELINSTANCE="CANCELINSTANCE";
     public static final String CANCEL="Cancel";
-    public static final String REQUEST_RFQINSTANCE="RFQINSTANCE";
-    public static final String REQUEST="Request";
-    public static final String OFFER_OFFERINSTANCE="OFFERINSTANCE";
-    public static final String OFFER="Offer";
+    public static final String MAKEOFFER_OFFERINSTANCE="OFFERINSTANCE";
+    public static final String MAKEOFFER="MakeOffer";
+    public static final String MAKEREQUEST_RFQINSTANCE="RFQINSTANCE";
+    public static final String MAKEREQUEST="MakeRequest";
     public static final String RESCHEDULE_RSCHEDINSTANCE="RSCHEDINSTANCE";
     public static final String RESCHEDULE="Reschedule";
     public static final String RESOURCE_NODEDISKSPACE="NODEDISKSPACE";
@@ -68,10 +71,10 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     // adding AgentAction(s)
     AgentActionSchema rescheduleSchema = new AgentActionSchema(RESCHEDULE);
     add(rescheduleSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Reschedule.class);
-    AgentActionSchema offerSchema = new AgentActionSchema(OFFER);
-    add(offerSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer.class);
-    AgentActionSchema requestSchema = new AgentActionSchema(REQUEST);
-    add(requestSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Request.class);
+    AgentActionSchema makeRequestSchema = new AgentActionSchema(MAKEREQUEST);
+    add(makeRequestSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest.class);
+    AgentActionSchema makeOfferSchema = new AgentActionSchema(MAKEOFFER);
+    add(makeOfferSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer.class);
     AgentActionSchema cancelSchema = new AgentActionSchema(CANCEL);
     add(cancelSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cancel.class);
 
@@ -80,6 +83,8 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     // adding Predicate(s)
     PredicateSchema rfqSchema = new PredicateSchema(RFQ);
     add(rfqSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ.class);
+    PredicateSchema offerSchema = new PredicateSchema(OFFER);
+    add(offerSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer.class);
     PredicateSchema costSchema = new PredicateSchema(COST);
     add(costSchema, uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost.class);
     PredicateSchema coresSchema = new PredicateSchema(CORES);
@@ -96,11 +101,13 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     resourceSchema.add(RESOURCE_OSVERSION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     resourceSchema.add(RESOURCE_NODEDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     rescheduleSchema.add(RESCHEDULE_RSCHEDINSTANCE, rfqSchema);
-    offerSchema.add(OFFER_OFFERINSTANCE, rfqSchema);
-    requestSchema.add(REQUEST_RFQINSTANCE, rfqSchema);
+    makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, rfqSchema);
+    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, offerSchema);
     cancelSchema.add(CANCEL_CANCELINSTANCE, rfqSchema);
     rfqSchema.add(RFQ_COST, costSchema, ObjectSchema.MANDATORY);
     rfqSchema.add(RFQ_REQUESTID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+    offerSchema.add(OFFER_OFFERCOST, costSchema, ObjectSchema.MANDATORY);
+    offerSchema.add(OFFER_OFFERID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
     costSchema.add(COST_DEADLINE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
     costSchema.add(COST_NOTBEFORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
     costSchema.add(COST_CPUHOURCOST, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);

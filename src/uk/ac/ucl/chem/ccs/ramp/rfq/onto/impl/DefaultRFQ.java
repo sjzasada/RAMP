@@ -6,11 +6,11 @@ import uk.ac.ucl.chem.ccs.ramp.rfq.onto.*;
 /**
 * Protege name: RFQ
 * @author OntologyBeanGenerator v4.1
-* @version 2011/06/9, 15:37:32
+* @version 2011/06/11, 21:40:02
 */
 public class DefaultRFQ implements RFQ {
 
-  private static final long serialVersionUID = 2389062215155035045L;
+  private static final long serialVersionUID = -1439939741134496089L;
 
   private String _internalInstanceName = null;
 

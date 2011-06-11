@@ -9,8 +9,39 @@
  */
 package uk.ac.ucl.chem.ccs.ramp.market;
 
+import java.util.HashMap;
+
+import uk.ac.ucl.chem.ccs.ramp.user.Offer;
+
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 
 public class MarketMaker extends Agent {
 
+	
+	HashMap<String, Integer> bank = new HashMap<String, Integer>();
+	HashMap<String, Offer> reservations = new HashMap<String, Offer>();
+	
+	protected void setup () {
+		
+		//add some users to bank
+		//TODO: make the banking data persistent
+		
+		bank.put("stef", 100);
+		bank.put("Able", 100);
+		
+	}
+	
+	protected class BankingBehaviour extends CyclicBehaviour {
+
+
+		public void action() {
+			// TODO Auto-generated method stub
+			
+			
+			
+		}
+		
+	}
+	
 }

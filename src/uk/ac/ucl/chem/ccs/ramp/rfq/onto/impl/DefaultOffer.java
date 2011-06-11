@@ -1,17 +1,16 @@
 package uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl;
 
 
-import jade.util.leap.*;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.*;
 
 /**
 * Protege name: Offer
 * @author OntologyBeanGenerator v4.1
-* @version 2011/06/9, 15:37:32
+* @version 2011/06/11, 21:40:02
 */
 public class DefaultOffer implements Offer {
 
-  private static final long serialVersionUID = 2389062215155035045L;
+  private static final long serialVersionUID = -1439939741134496089L;
 
   private String _internalInstanceName = null;
 
@@ -28,21 +27,25 @@ public class DefaultOffer implements Offer {
   }
 
    /**
-   * Protege name: OFFERINSTANCE
+   * Protege name: OFFERCOST
    */
-   private List offerinstancE = new ArrayList();
-   public void addOFFERINSTANCE(RFQ elem) { 
-     offerinstancE.add(elem);
+   private Cost offercosT;
+   public void setOFFERCOST(Cost value) { 
+    this.offercosT=value;
    }
-   public boolean removeOFFERINSTANCE(RFQ elem) {
-     boolean result = offerinstancE.remove(elem);
-     return result;
+   public Cost getOFFERCOST() {
+     return this.offercosT;
    }
-   public void clearAllOFFERINSTANCE() {
-     offerinstancE.clear();
+
+   /**
+   * Protege name: OFFERID
+   */
+   private String offeriD;
+   public void setOFFERID(String value) { 
+    this.offeriD=value;
    }
-   public Iterator getAllOFFERINSTANCE() {return offerinstancE.iterator(); }
-   public List getOFFERINSTANCE() {return offerinstancE; }
-   public void setOFFERINSTANCE(List l) {offerinstancE = l; }
+   public String getOFFERID() {
+     return this.offeriD;
+   }
 
 }

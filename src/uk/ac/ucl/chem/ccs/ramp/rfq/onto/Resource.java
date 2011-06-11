@@ -5,7 +5,7 @@ package uk.ac.ucl.chem.ccs.ramp.rfq.onto;
 /**
 * Protege name: Resource
 * @author OntologyBeanGenerator v4.1
-* @version 2011/06/10, 10:25:58
+* @version 2011/06/11, 21:40:02
 */
 public interface Resource extends jade.content.Concept {
 

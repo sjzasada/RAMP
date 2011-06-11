@@ -18,7 +18,22 @@ import java.util.Vector;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultOffer;
 
+import jade.content.ContentManager;
+import jade.content.lang.Codec;
+import jade.content.lang.Codec.CodecException;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -34,8 +49,14 @@ public class ResourceAgent extends Agent {
 	private int minPrice;
 	private ResourceInterface resInter;
 	
+	private Codec codec = new SLCodec(); 
+	private Ontology onto = MarketOntology.getInstance();
 	
 	protected void setup () {
+		
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(onto);
+		
 		System.out.println("My name is " + getAID().getLocalName());
 		System.out.println("My GUID is " + getAID().getName());
 		System.out.println("My addresses are:");
@@ -101,14 +122,62 @@ public class ResourceAgent extends Agent {
 				
 				//decide whether to reply
 				
-				if (resInter.canSatisfy(new Request())) {
-					// we can respond
+				
+				try {
+					ContentManager cm = myAgent.getContentManager();
+					Action act = (Action) cm.extractContent(msg);
+					MakeRequest req = (MakeRequest)act.getAction();
+					Iterator<RFQ> it = req.getAllRFQINSTANCE();
+					
+					boolean anyOffers = false;
+					
+					MakeOffer offers = new DefaultMakeOffer();
+					
+					while (it.hasNext()) {
+						 RFQ rfq = it.next();
+						 
+						 Cost offerCost = resInter.canSatisfy(rfq.getCOST());
+						 
+						 if (offerCost != null) {
+								// we can respond
+							 	anyOffers = true;
+							 	
+							 	Offer myOffer = new DefaultOffer();
+							 	
+							 	myOffer.setOFFERCOST(offerCost);
+							 	
+							 	
+								Random generator = new Random();
+								int id = generator.nextInt();
+							 	
+							 	myOffer.setOFFERID(myAgent.getName()+id);
+							 	
+							 	offers.addOFFERINSTANCE(myOffer);
+							 	
+							}
+						 
+						 //RFQ offer = 
+						 
+					}
+
+					
+				
+			
+				if (anyOffers) {
 					reply.setPerformative(ACLMessage.PROPOSE);
-					reply.setContent(String.valueOf(minPrice));
-				} else {
+					myAgent.getContentManager().fillContent(reply, offers);
+				} else	  {
 					//decline
 					reply.setPerformative(ACLMessage.REFUSE);
 				}
+				
+				
+			} catch (OntologyException oe) {
+				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+			} catch (CodecException ce) {
+				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+			}
+				
 				myAgent.send(reply);
 			 
 			} else {

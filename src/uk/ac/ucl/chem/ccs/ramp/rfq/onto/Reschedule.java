@@ -6,7 +6,7 @@ import jade.util.leap.*;
 /**
 * Protege name: Reschedule
 * @author OntologyBeanGenerator v4.1
-* @version 2011/06/9, 15:37:32
+* @version 2011/06/11, 21:40:02
 */
 public interface Reschedule extends jade.content.AgentAction {
 

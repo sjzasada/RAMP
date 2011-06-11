@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.Vector;
 
 import java.util.Iterator;
@@ -22,7 +23,22 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeRequest;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultRFQ;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultRequest;
 
+import jade.content.ContentManager;
+import jade.content.lang.Codec;
+import jade.content.lang.Codec.CodecException;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -31,6 +47,7 @@ import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
@@ -41,12 +58,20 @@ public class UserAgent extends Agent {
 	
 	
 	//Hash containing a hash of all of the offers made for a particular RequestID
-	private HashMap<String, HashMap<AID, Offer>> Offers = new HashMap<String, HashMap<AID, Offer>>();
+	private HashMap<String, HashMap<AID, Offer>> offers = new HashMap<String, HashMap<AID, Offer>>();
 	
 	private Vector resourceAgents = new Vector();
 	UserGui myGui=null;
 	
+	private Codec codec = new SLCodec(); 
+	private Ontology onto = MarketOntology.getInstance();
+	
 	protected void setup () {
+		
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(onto);
+		
+		//register the content language 
 		
 		
 		// get the args to the prog - should be 1
@@ -137,6 +162,12 @@ public class UserAgent extends Agent {
 
 	//method to begin a negotiation
 	public void requestQuote (Request r) {
+		
+		Random generator = new Random();
+		int id = generator.nextInt();
+	 	
+	 	r.setRequestID(getName()+id);
+		
 		addBehaviour(new RequestAQuote(this, r));
 	}
 	
@@ -161,7 +192,7 @@ public class UserAgent extends Agent {
 		private int round =0; 
 		private HashMap<AID, Offer> quotes;
 		private AID bestSeller;
-		private int bestPrice; 
+		private Cost bestCost; 
 		private SequentialBehaviour twoStep;
 		
 		private RequestAQuote (Agent a, Request r) {
@@ -243,6 +274,10 @@ public class UserAgent extends Agent {
 	
 		
 		//this behaviour opens up negotiations
+		
+		//TODO: Refactor into two separate behaviours - 1 kicks off bidding rounds and 2 consolidates offers
+		
+		
 		private class ResourceNegotiator extends Behaviour {
 			
 			private RequestManager parent;
@@ -267,10 +302,7 @@ public class UserAgent extends Agent {
 				case 0:
 					//send the cfp to all resources
 					
-					ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-
-					
-					
+					ACLMessage cfp = new ACLMessage(ACLMessage.CFP);				
 					Iterator<AID> it = resourceAgents.iterator();
 					while (it.hasNext()) {
 						cfp.addReceiver(it.next());
@@ -280,13 +312,33 @@ public class UserAgent extends Agent {
 					
 					//TODO: make the message more comprehensive
 					
-					cfp.setContent(Integer.toString(rq.getCPUCount()));
-					cfp.setConversationId("compute-negotiation-"+raq.round);
+							
+					cfp.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+                    cfp.setOntology(MarketOntology.ONTOLOGY_NAME);
+ 
+										
+					//cfp.setContent(Integer.toString(rq.getCPUCount()));
+					
+					String conversation = "compute-negotiation-"+System.currentTimeMillis();
+					
+					cfp.setConversationId(conversation);
 					cfp.setReplyWith("cfp"+System.currentTimeMillis());
+					
+					
+					MakeRequest req = new DefaultMakeRequest();
+					req.addRFQINSTANCE(rq.getRFQObject());
+					//add onto object to message 
+					try {
+						myAgent.getContentManager().fillContent(cfp, req);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					
 					
 					myAgent.send(cfp);
 					
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("compute-negotiation-"+raq.round), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId(conversation), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
 					
 					step = 1;
 					break;
@@ -299,15 +351,30 @@ public class UserAgent extends Agent {
 							
 							AID responder = reply.getSender();
 							
-							int price = Integer.parseInt(reply.getContent());
 							
+							try {
+								ContentManager cm = myAgent.getContentManager();
+								Action act = (Action) cm.extractContent(reply);
+								MakeOffer off = (MakeOffer)act.getAction();
+								
+								//throws exception if we don't understand message
+								
+								Cost price = off.getAllOFFERINSTANCE();
+								
+							} catch (OntologyException oe) {
+								//reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+							} catch (CodecException ce) {
+								//reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+							}
 							
-							String conversation = reply.getConversationId();
+												
+							
+							String conv= reply.getConversationId();
 							
 							//add this offer to the hash table										
-							raq.quotes.put(responder, new Offer(responder, price, conversation));
+							raq.quotes.put(responder, new Offer(responder, price, conv));
 							
-							System.err.println("Conversation " + conversation);
+							System.err.println("Conversation " + conv);
 							
 							
 							if (raq.bestSeller == null || price < raq.bestPrice) {

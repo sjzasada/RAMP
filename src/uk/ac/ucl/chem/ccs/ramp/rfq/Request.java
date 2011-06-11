@@ -26,6 +26,9 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.*;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.*;
+
 public class Request {
 
 	private ObjectFactory of;
@@ -238,8 +241,51 @@ public class Request {
     	
     }
 	
-	
-	
+
+    public Cost getCostObject() {
+    	
+    	Resource r = new DefaultResource();
+    	
+    	r.setARCHITECTURE(rfq.getRequest().getArchitecture());
+    	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString());
+    	r.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
+    	r.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
+    	r.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());
+    	r.setOSVERSION(rfq.getRequest().getOSVersion());
+    	r.setRAMPERCORE(rfq.getRequest().getRAMPerCore().toString());
+    	r.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
+    	
+    	
+    	Cores co = new DefaultCores();
+    	
+    	co.setDURATION(rfq.getRequest().getWallTime().toString());
+    	co.setNODECORES(0);
+    	co.setNODECOUNT(0);
+    	co.setTOTALCORES(getCPUCount());
+    	co.setRESOURCE(r);
+    	
+    	Cost c = new DefaultCost();
+    	c.setCORES(co);
+    	c.setCPUHOURCOST(Integer.toString(getCPUCost()));
+    	c.setDEADLINE(getEnd().toString());
+    	c.setNOTBEFORE(getStart().toString());
+    	
+    	
+    	return c;
+    }
+    
+	public RFQ getRFQObject() {
+		
+		RFQ rfq = new DefaultRFQ();
+		
+		rfq.setCOST(getCostObject());
+		rfq.setREQUESTID(requestID);
+		
+		return rfq;
+		
+	}
+    
+    
 	/**
 	 * @param args
 	 */

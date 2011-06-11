@@ -1,23 +1,24 @@
 package uk.ac.ucl.chem.ccs.ramp.rfq.onto;
 
 
-import jade.util.leap.*;
 
 /**
 * Protege name: Offer
 * @author OntologyBeanGenerator v4.1
-* @version 2011/06/9, 15:37:32
+* @version 2011/06/11, 21:40:02
 */
-public interface Offer extends jade.content.AgentAction {
+public interface Offer extends jade.content.Predicate {
 
    /**
-   * Protege name: OFFERINSTANCE
+   * Protege name: OFFERCOST
    */
-   public void addOFFERINSTANCE(RFQ elem);
-   public boolean removeOFFERINSTANCE(RFQ elem);
-   public void clearAllOFFERINSTANCE();
-   public Iterator getAllOFFERINSTANCE();
-   public List getOFFERINSTANCE();
-   public void setOFFERINSTANCE(List l);
+   public void setOFFERCOST(Cost value);
+   public Cost getOFFERCOST();
+
+   /**
+   * Protege name: OFFERID
+   */
+   public void setOFFERID(String value);
+   public String getOFFERID();
 
 }
