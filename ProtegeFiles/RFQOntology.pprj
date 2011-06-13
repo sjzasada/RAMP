@@ -1,4 +1,4 @@
-; Thu Jun 09 15:40:50 BST 2011
+; Fri Jun 10 10:27:44 BST 2011
 ; 
 ;+ (version "3.4.6")
 ;+ (build "Build 613")
@@ -19,7 +19,7 @@
 
 ([BROWSER_SLOT_NAMES] of  Property_List
 
-	(properties [RFQOntology_ProjectKB_Class10172]))
+	(properties [RFQOntology_ProjectKB_Class10163]))
 
 ([CLSES_TAB] of  Widget
 
@@ -63,7 +63,7 @@
 	(is_hidden FALSE)
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
 
-([KB_654811_Class152] of  Map
+([KB_578894_Class152] of  Map
 )
 
 ([KB_981759_Class0] of  String
@@ -74,9 +74,9 @@
 ([KB_981759_Class1] of  Map
 
 	(entries
-		[RFQOntology_ProjectKB_Class10173]
-		[RFQOntology_ProjectKB_Class10174]
-		[RFQOntology_ProjectKB_Class10175]))
+		[RFQOntology_ProjectKB_Class10164]
+		[RFQOntology_ProjectKB_Class10165]
+		[RFQOntology_ProjectKB_Class10166]))
 
 ([KB_981759_Class100] of  Property_List
 )
@@ -356,45 +356,26 @@
 ([RFQOntology_ProjectKB_Class10162] of  Property_List
 )
 
-([RFQOntology_ProjectKB_Class10163] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([RFQOntology_ProjectKB_Class10164] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([RFQOntology_ProjectKB_Class10165] of  Property_List
-)
-
-([RFQOntology_ProjectKB_Class10166] of  Property_List
-)
-
-([RFQOntology_ProjectKB_Class10167] of  Property_List
-)
-
-([RFQOntology_ProjectKB_Class10172] of  String
+([RFQOntology_ProjectKB_Class10163] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([RFQOntology_ProjectKB_Class10173] of  Map_Entry
+([RFQOntology_ProjectKB_Class10164] of  Map_Entry
 
 	(key "add_name_on_instance_form")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([RFQOntology_ProjectKB_Class10174] of  Map_Entry
+([RFQOntology_ProjectKB_Class10165] of  Map_Entry
 
 	(key "change_tracking_active")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([RFQOntology_ProjectKB_Class10175] of  Map_Entry
+([RFQOntology_ProjectKB_Class10166] of  Map_Entry
 
 	(key "suppress_instance_counting")
 	(key_class "java.lang.String")

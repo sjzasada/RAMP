@@ -20,5 +20,8 @@ public interface Offer extends jade.content.Predicate {
    */
    public void setOFFERID(String value);
    public String getOFFERID();
+   
+   public void setREQUESTID(String value);
+   public String getREQUESTID();
 
 }

@@ -69,6 +69,11 @@ public class Request {
 		return rfq.getRequest().getCPUHourCost().intValue();
 	}
 	
+	public void setCPUCost (int c) {
+		RequestForQuotation.Request rfqr = of.createRequestForQuotationRequest();
+		rfqr.setCPUHourCost(BigInteger.valueOf(c));
+		rfq.setRequest(rfqr);
+	}
 	
 	public String getArch () {
 		return rfq.getRequest().getArchitecture();

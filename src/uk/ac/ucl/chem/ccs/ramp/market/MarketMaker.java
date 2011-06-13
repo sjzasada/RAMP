@@ -11,7 +11,7 @@ package uk.ac.ucl.chem.ccs.ramp.market;
 
 import java.util.HashMap;
 
-import uk.ac.ucl.chem.ccs.ramp.user.Offer;
+import uk.ac.ucl.chem.ccs.ramp.user.Offers;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -20,7 +20,7 @@ public class MarketMaker extends Agent {
 
 	
 	HashMap<String, Integer> bank = new HashMap<String, Integer>();
-	HashMap<String, Offer> reservations = new HashMap<String, Offer>();
+	HashMap<String, Offers> reservations = new HashMap<String, Offers>();
 	
 	protected void setup () {
 		

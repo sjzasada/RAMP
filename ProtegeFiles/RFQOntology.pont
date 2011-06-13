@@ -1,4 +1,4 @@
-; Thu Jun 09 15:40:50 BST 2011
+; Fri Jun 10 10:27:44 BST 2011
 ; 
 ;+ (version "3.4.6")
 ;+ (build "Build 613")
@@ -21,14 +21,14 @@
 ;+		(allowed-classes RFQ)
 		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write))
-	(single-slot CPUSPEED
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
 	(multislot OFFERINSTANCE
 		(type INSTANCE)
 ;+		(allowed-classes RFQ)
 		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(single-slot CPUSPEED
+		(type STRING)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(single-slot OSVERSION
 		(type STRING)
@@ -43,12 +43,12 @@
 		(type STRING)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot INTERNODEBANDWIDTH
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
 	(single-slot NODECORES
 		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot INTERNODEBANDWIDTH
+		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(single-slot CORES
@@ -56,15 +56,15 @@
 ;+		(allowed-classes Cores)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot RFQOntology_Class7
-		(type SYMBOL)
-;+		(allowed-parents)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
 	(single-slot RESOURCE
 		(type INSTANCE)
 ;+		(allowed-classes Resource)
 ;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot RFQOntology_Class7
+		(type SYMBOL)
+;+		(allowed-parents)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(single-slot REQUESTID
 		(type STRING)

@@ -48,4 +48,17 @@ public class DefaultOffer implements Offer {
      return this.offeriD;
    }
 
+
+private String requestiD;
+public String getREQUESTID() {
+	// TODO Auto-generated method stub
+	return this.requestiD;
+}
+
+
+public void setREQUESTID(String value) {
+	// TODO Auto-generated method stub
+	this.requestiD = value;
+}
+
 }

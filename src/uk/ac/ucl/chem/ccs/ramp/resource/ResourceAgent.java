@@ -145,7 +145,7 @@ public class ResourceAgent extends Agent {
 							 	Offer myOffer = new DefaultOffer();
 							 	
 							 	myOffer.setOFFERCOST(offerCost);
-							 	
+							 	myOffer.setREQUESTID(rfq.getREQUESTID());
 							 	
 								Random generator = new Random();
 								int id = generator.nextInt();

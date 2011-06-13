@@ -27,6 +27,7 @@ import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
+import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeRequest;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultRFQ;
@@ -43,6 +44,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
@@ -58,7 +60,7 @@ public class UserAgent extends Agent {
 	
 	
 	//Hash containing a hash of all of the offers made for a particular RequestID
-	private HashMap<String, HashMap<AID, Offer>> offers = new HashMap<String, HashMap<AID, Offer>>();
+	private HashMap<String, Offers> offers = new HashMap<String, Offers>();
 	
 	private Vector resourceAgents = new Vector();
 	UserGui myGui=null;
@@ -165,10 +167,13 @@ public class UserAgent extends Agent {
 		
 		Random generator = new Random();
 		int id = generator.nextInt();
-	 	
-	 	r.setRequestID(getName()+id);
-		
-		addBehaviour(new RequestAQuote(this, r));
+	 	String requestID = getName()+id;
+	 	r.setRequestID(requestID);
+
+	 	Vector<Request> v = new Vector<Request>();
+	 	v.add(r);
+	 	//add the single request to the vector
+		addBehaviour(new RequestAQuote(requestID, v));
 	}
 	
 	public void requestQuote (Vector<Request> v) {
@@ -186,26 +191,19 @@ public class UserAgent extends Agent {
 	private class RequestAQuote extends Behaviour {
 		
 		boolean first=false;
+		private Vector<Request> currentRequest;
+		private String requestID;
 		
-		private Request currentRequest;
-		private Agent a;
-		private int round =0; 
-		private HashMap<AID, Offer> quotes;
-		private AID bestSeller;
-		private Cost bestCost; 
+		
 		private SequentialBehaviour twoStep;
 		
-		private RequestAQuote (Agent a, Request r) {
-			quotes = new HashMap<AID, Offer>();
-			this.a = a;
-			currentRequest = r;
-	
+		private RequestAQuote (String requestID, Vector<Request> request) {
+			this.requestID=requestID;
+			currentRequest = request;		
+			twoStep = new SequentialBehaviour (myAgent);
 			
-			twoStep = new SequentialBehaviour (a);
-
-
+			offers.put(requestID, new Offers());
 			
-		
 		}
 		
 		
@@ -218,9 +216,21 @@ public class UserAgent extends Agent {
 		public void action() {
 			// TODO Auto-generated method stub
 			if (!first) {
-				displayMessage("Starting twostep behaviour");
-				twoStep.addSubBehaviour(new RequestManager (a, currentRequest, this));
-				twoStep.addSubBehaviour(new ResourceNotifier(this));
+				displayMessage("Starting parallel behaviour");
+				
+				ParallelBehaviour pb = new ParallelBehaviour(myAgent, ParallelBehaviour.WHEN_ANY);
+				
+				//add a parallel behaviour to run the bids
+				pb.addSubBehaviour(new RequestManager(myAgent, currentRequest, requestID));
+				
+				//add a second parallel behaviour to process offers
+				pb.addSubBehaviour(new ResourceNegotiator(requestID));
+				
+				
+				twoStep.addSubBehaviour(pb);
+				
+				//when pb has finished, run the notifier
+				twoStep.addSubBehaviour(new ResourceNotifier(requestID));
 				addBehaviour(twoStep);
 				first=true;
 			} else {
@@ -241,66 +251,35 @@ public class UserAgent extends Agent {
 			
 			private long deadline, initTime, deltaT;
 			
-			private Request r;
-			private RequestAQuote raq;
+			private Vector<Request> requests;
+			private int round = 0;
+			private String requestID;
 			
-			private RequestManager (Agent a, Request r, RequestAQuote raq) {
+			private RequestManager (Agent a, Vector<Request> request, String requestID) {
 				super (a, 30000);
 				deadline = System.currentTimeMillis() + 120000;
 				initTime = System.currentTimeMillis();
 				deltaT=deadline - initTime;
-				this.r=r;
-				this.raq=raq;
+				this.requests=requests;
+				this.requestID=requestID;
 			}
 			
 			public void onTick () {
 				long currentTime = System.currentTimeMillis();
 				
+				
+				
+				//check if we should finish bidding
 				if (currentTime > deadline) {
 					displayMessage("Deadline passed, stopping requesting");
 					stop();
 				} else {
-					displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
-					displayMessage("Bidding round " + ++raq.round);
 					
-					// add a behaviour to start negotiations
-					myAgent.addBehaviour(new ResourceNegotiator(r, this, raq));
+					Offers theOffers = offers.get(requestID);
+					
+					displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
+					displayMessage("Bidding round " + ++round);
 
-				}
-				
-			}
-			
-		}
-	
-		
-		//this behaviour opens up negotiations
-		
-		//TODO: Refactor into two separate behaviours - 1 kicks off bidding rounds and 2 consolidates offers
-		
-		
-		private class ResourceNegotiator extends Behaviour {
-			
-			private RequestManager parent;
-			private RequestAQuote raq;
-			private Request rq;
-			private int step = 0;
-			private int repliesCount = 0;
-			
-						
-			private MessageTemplate mt;
-			
-			ResourceNegotiator (Request rq, RequestManager r, RequestAQuote raq) {
-				this.raq=raq;
-				this.rq=rq;
-				parent = r;
-			}
-			
-			public void action () {
-				
-				switch (step) {
-				
-				case 0:
-					//send the cfp to all resources
 					
 					ACLMessage cfp = new ACLMessage(ACLMessage.CFP);				
 					Iterator<AID> it = resourceAgents.iterator();
@@ -308,7 +287,7 @@ public class UserAgent extends Agent {
 						cfp.addReceiver(it.next());
 					}
 					
-					displayMessage("Polling sellers");
+					//displayMessage("Polling sellers");
 					
 					//TODO: make the message more comprehensive
 					
@@ -316,17 +295,40 @@ public class UserAgent extends Agent {
 					cfp.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
                     cfp.setOntology(MarketOntology.ONTOLOGY_NAME);
  
-										
-					//cfp.setContent(Integer.toString(rq.getCPUCount()));
-					
-					String conversation = "compute-negotiation-"+System.currentTimeMillis();
+                    //unique conversation ID for this auction
+					String conversation = "compute-auction-"+requestID;
 					
 					cfp.setConversationId(conversation);
-					cfp.setReplyWith("cfp"+System.currentTimeMillis());
-					
+					cfp.setReplyWith("cfp"+requestID);
+					//TODO: Should set reply by too
 					
 					MakeRequest req = new DefaultMakeRequest();
-					req.addRFQINSTANCE(rq.getRFQObject());
+					
+					Iterator<Request> reqit = requests.iterator();
+					
+					//add each subrequest
+					while (reqit.hasNext()) {
+						
+						Request r = reqit.next();
+						
+						
+						//TODO: need to check cost is better than request
+						
+						Offer o = theOffers.getBestOffer(requestID);
+						//if an offer has already been made, lower the price
+						if (o != null) {
+						
+						int bestCost = Integer.parseInt(o.getOFFERCOST().getCPUHOURCOST());
+						
+						if (bestCost < r.getCPUCost()) {
+							r.setCPUCost(bestCost);
+						}
+						}
+						
+						req.addRFQINSTANCE(r.getRFQObject());
+					}
+					
+					
 					//add onto object to message 
 					try {
 						myAgent.getContentManager().fillContent(cfp, req);
@@ -335,15 +337,40 @@ public class UserAgent extends Agent {
 					}
 
 					
-					
+					//send the message
 					myAgent.send(cfp);
 					
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId(conversation), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-					
-					step = 1;
-					break;
-					
-				case 1:
+
+
+				}
+				
+			}
+			
+		}
+	
+		
+
+		//process received offers
+		private class ResourceNegotiator extends Behaviour {
+			
+			private String requestID;
+			private int step = 0;
+			private int repliesCount = 0;
+			
+						
+			private MessageTemplate mt;
+			
+			ResourceNegotiator (String requestID) {
+				this.requestID=requestID;
+				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("compute-auction-"+requestID),
+						MessageTemplate.MatchInReplyTo("cfp"+requestID));
+
+			}
+			
+			public void action () {
+
+				Offers theOffers = offers.get(requestID);
+				
 					ACLMessage reply = myAgent.receive(mt);
 					if (reply != null) {
 						if (reply.getPerformative() == ACLMessage.PROPOSE) {
@@ -359,7 +386,27 @@ public class UserAgent extends Agent {
 								
 								//throws exception if we don't understand message
 								
-								Cost price = off.getAllOFFERINSTANCE();
+								Iterator<Offer> itr = off.getAllOFFERINSTANCE();
+								
+								// process the offers received 
+								while (itr.hasNext()) {
+									Offer myOffer=itr.next();
+									
+									String currentRequest = myOffer.getREQUESTID();
+									
+									Offer best = theOffers.getBestOffer(currentRequest);
+									
+									displayMessage("Recieved offer " + myOffer.getOFFERID() + " from " + responder);
+									
+									//check if this is the best offer or not
+									if (best == null) {
+										theOffers.setBestOffer(currentRequest, responder, myOffer);
+									} else if (RequestEvaluator.naiveEvaluator(best, myOffer)) {
+										theOffers.setBestOffer(currentRequest, responder, myOffer);								
+									}
+									theOffers.addOffer(responder, currentRequest, myOffer);
+								}
+								
 								
 							} catch (OntologyException oe) {
 								//reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
@@ -369,37 +416,26 @@ public class UserAgent extends Agent {
 							
 												
 							
-							String conv= reply.getConversationId();
-							
-							//add this offer to the hash table										
-							raq.quotes.put(responder, new Offer(responder, price, conv));
-							
-							System.err.println("Conversation " + conv);
-							
-							
-							if (raq.bestSeller == null || price < raq.bestPrice) {
-								raq.bestPrice = price;
-								raq.bestSeller = reply.getSender();
-							}
+							//String conv= reply.getConversationId();
+							//System.err.println("Conversation " + conv);
 						
-							displayMessage("Recieved price " + price + " from " + reply.getSender());
+							//store the new offers object
+							offers.put(requestID, theOffers);
 							
 						}
 						repliesCount++;
 						
 						//System.out.println("Rep no " + repliesCount +"/"+resourceAgents.size());
 						
-						if (repliesCount == resourceAgents.size()) {
-							step = 2;
-						}
+						//if (repliesCount == resourceAgents.size()) {
+						//	step = 2;
+						//}
 					//	System.out.println("step = " + step);
 						
 					} else {
 						block();
 					}
-					break;
 
-				}
 				
 			}
 			
@@ -411,59 +447,47 @@ public class UserAgent extends Agent {
 	
 		private class ResourceNotifier extends Behaviour {
 
-			private RequestAQuote raq;
-			private boolean done = false;
+			private String requestID; 
 			private int step=1;
 			private MessageTemplate mt;
-			
-			private ResourceNotifier (RequestAQuote raq) {
-				this.raq = raq;
+			private Offers theOffers;
+			private ResourceNotifier (String requestID) {
+				this.requestID = requestID;
+				theOffers = offers.get(requestID);
 			}
 			
 			@Override
 			public void action() {
 				// TODO Auto-generated method stub
 				
-				
-				
-				
+				displayMessage("Negotiating sale");
 				switch (step) {
-				
+								
 				case 1:
 					
-				Collection<Offer> coll = raq.quotes.values();
-				Iterator<Offer> itr = coll.iterator();
-				while (itr.hasNext()) {
-					Offer o = (Offer)itr.next();
-					displayMessage(o.toString());
-				}
-				
+					//single unit case
+					//TODO: extend for multiunit
 					
-				if (raq.bestSeller != null) {
+					Offer bestOffer = theOffers.getBestOffer(requestID);
+					AID bestAgent = theOffers.getBestAgent(requestID);
+					
+					//TODO: make sure best offer meets request
+					
+				if (bestOffer != null) {
 					//TODO: implement the offer evaluation
-					displayMessage("Accepting offer from " + raq.bestSeller);
-					
-					
-					
-					AID winner = raq.bestSeller;
-					Offer offer = raq.quotes.get(winner);
-					
-					if (offer == null) {
-						System.err.println("found in hash map");
-					}
-					
+					displayMessage("Best offer (" + bestOffer.getOFFERID() + ")from " +bestAgent);
+															
 					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-					 order.addReceiver(winner);
-					 order.setContent(Integer.toString(offer.price));
-					 order.setReplyWith("order"+System.currentTimeMillis());
-					 order.setConversationId(offer.getConversation());
+					 order.addReceiver(bestAgent);
+					 order.setContent(bestOffer.getOFFERID());
+					 order.setReplyWith("order"+requestID);
+					 order.setConversationId("accept"+requestID);
 					 myAgent.send(order);
 					 
-					 System.err.println(offer.getPrice());
-					 System.err.println(offer.getConversation());
+					 System.err.println(bestOffer.getOFFERCOST().getCPUHOURCOST());
 					 System.err.println(order.getReplyWith());
 					 
-					 mt = MessageTemplate.and(MessageTemplate.MatchConversationId(offer.getConversation()), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+					 mt = MessageTemplate.and(MessageTemplate.MatchConversationId("accept"+requestID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 					step=2;
 				} else {
 					displayMessage("No bids received");
