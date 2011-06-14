@@ -1,4 +1,4 @@
-; Fri Jun 10 10:27:44 BST 2011
+; Sat Jun 11 21:40:07 BST 2011
 ; 
 ;+ (version "3.4.6")
 ;+ (build "Build 613")
@@ -23,7 +23,7 @@
 		(create-accessor read-write))
 	(multislot OFFERINSTANCE
 		(type INSTANCE)
-;+		(allowed-classes RFQ)
+;+		(allowed-classes Offer)
 		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write))
 	(single-slot CPUSPEED
@@ -91,6 +91,11 @@
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
+	(single-slot OFFERCOST
+		(type INSTANCE)
+;+		(allowed-classes Cost)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
 	(single-slot TOTALDISKSPACE
 		(type STRING)
 ;+		(cardinality 0 1)
@@ -107,12 +112,16 @@
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
+	(single-slot OFFERID
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
 	(single-slot TOTALCORES
 		(type INTEGER)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
-(defclass Request
+(defclass MakeRequest
 	(is-a AgentAction)
 	(role concrete)
 	(multislot RFQINSTANCE
@@ -121,12 +130,12 @@
 		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write)))
 
-(defclass Offer
+(defclass MakeOffer
 	(is-a AgentAction)
 	(role concrete)
 	(multislot OFFERINSTANCE
 		(type INSTANCE)
-;+		(allowed-classes RFQ)
+;+		(allowed-classes Offer)
 		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write)))
 
@@ -239,6 +248,19 @@
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(single-slot REQUESTID
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write)))
+
+(defclass Offer
+	(is-a Predicate)
+	(role concrete)
+	(single-slot OFFERCOST
+		(type INSTANCE)
+;+		(allowed-classes Cost)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot OFFERID
 		(type STRING)
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))

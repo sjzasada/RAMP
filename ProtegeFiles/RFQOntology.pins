@@ -1,4 +1,4 @@
-; Fri Jun 10 10:27:44 BST 2011
+; Sat Jun 11 21:40:07 BST 2011
 ; 
 ;+ (version "3.4.6")
 ;+ (build "Build 613")
@@ -15,6 +15,14 @@
 
 	(%3AJADE-IGNORE FALSE))
 
+([MakeOffer] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
+([MakeRequest] of  %3AJADE-CLASS
+
+	(%3AJADE-IGNORE FALSE))
+
 ([Offer] of  %3AJADE-CLASS
 
 	(%3AJADE-IGNORE FALSE))
@@ -23,10 +31,6 @@
 
 	(%3AONTOLOGYNAME "Market")
 	(%3APACKAGE "uk.ac.ucl.chem.ccs.ramp.rfq.onto"))
-
-([Request] of  %3AJADE-CLASS
-
-	(%3AJADE-IGNORE FALSE))
 
 ([Reschedule] of  %3AJADE-CLASS
 
