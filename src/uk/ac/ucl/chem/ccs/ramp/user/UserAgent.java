@@ -10,10 +10,7 @@
 package uk.ac.ucl.chem.ccs.ramp.user;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 
@@ -23,15 +20,15 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
+
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ;
+
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeRequest;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultRFQ;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultRequest;
+
+
 
 import jade.content.ContentManager;
 import jade.content.lang.Codec;
@@ -43,7 +40,6 @@ import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;

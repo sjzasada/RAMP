@@ -45,7 +45,7 @@ import jade.lang.acl.MessageTemplate;
 
 public class ResourceAgent extends Agent {
 
-	private Map offers = new HashMap();
+	private HashMap<String, ResourceOfferRecord> currentOffers = new HashMap<String, ResourceOfferRecord>();
 	private int minPrice;
 	private ResourceInterface resInter;
 	
@@ -136,22 +136,25 @@ public class ResourceAgent extends Agent {
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();
 						 
-						 Cost offerCost = resInter.canSatisfy(rfq.getCOST());
+						 ResourceOfferRecord ror = resInter.canSatisfy(rfq.getCOST());
 						 
-						 if (offerCost != null) {
-								// we can respond
-							 	anyOffers = true;
-							 	
-							 	Offer myOffer = new DefaultOffer();
-							 	
-							 	myOffer.setOFFERCOST(offerCost);
-							 	myOffer.setREQUESTID(rfq.getREQUESTID());
-							 	
+						 					 
+						 if (ror != null) {
+							 //TODO: need to check here if we've offered before and cancel offers if resource now cannot satisfy 
 								Random generator = new Random();
 								int id = generator.nextInt();
+								
+							 ror.setOfferID(myAgent.getName()+id);
+							 ror.setRequestID(rfq.getREQUESTID());
+							 
+							 currentOffers.put(rfq.getREQUESTID(), ror);
+							 
+							 	// we can respond
+							 	anyOffers = true;
 							 	
-							 	myOffer.setOFFERID(myAgent.getName()+id);
-							 	
+							 	//get the current offer to send
+							 	Offer myOffer = ror.getOffer();
+							 					 	
 							 	offers.addOFFERINSTANCE(myOffer);
 							 	
 							}
@@ -193,10 +196,13 @@ public class ResourceAgent extends Agent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// ACCEPT_PROPOSAL Message received. Process it
+				//TODO: Check offer made is one of the offers we sent
+				
 				String price = msg.getContent();
 				ACLMessage reply = msg.createReply();
 
 				reply.setContent("foo");
+			
 				
 				System.err.println(reply.getInReplyTo());
 				System.err.println(reply.getConversationId());
