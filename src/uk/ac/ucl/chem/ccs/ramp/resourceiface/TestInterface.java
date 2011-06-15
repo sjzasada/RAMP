@@ -36,4 +36,10 @@ public class TestInterface implements ResourceInterface {
 		return null;
 	}
 
+
+	public String makeReservation(Cost c) {
+		// TODO Auto-generated method stub
+		return "123456";
+	}
+
 }

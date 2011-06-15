@@ -191,24 +191,44 @@ public class ResourceAgent extends Agent {
 	}
 	
 	private class PurchaseOrdersServer extends CyclicBehaviour {
+		
+		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+
+		
 		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// ACCEPT_PROPOSAL Message received. Process it
-				//TODO: Check offer made is one of the offers we sent
 				
-				String price = msg.getContent();
+				String offerID = msg.getContent();
 				ACLMessage reply = msg.createReply();
-
-				reply.setContent("foo");
-			
 				
-				System.err.println(reply.getInReplyTo());
-				System.err.println(reply.getConversationId());
-
-				reply.setPerformative(ACLMessage.INFORM);
-				System.out.println("Made deal with agent "+msg.getSender().getName() + " for " + price);
+				if (currentOffers.containsKey(offerID)) {
+					
+					ResourceOfferRecord ror = currentOffers.get(offerID);
+					
+					String reservationID = resInter.makeReservation(ror.getOffer().getOFFERCOST());
+					
+					
+					if (reservationID != null) {
+						reply.setContent(reservationID);
+						reply.setPerformative(ACLMessage.INFORM);
+						System.out.println("Made deal with agent "+msg.getSender().getName() + " reservation " + reservationID);
+					} else {
+						//can't now satisfy
+						reply.setPerformative(ACLMessage.REFUSE);
+					}
+					
+					currentOffers.remove(offerID);
+					
+				} else {
+					//we didn't make the offer. what are you doing?
+					
+					reply.setPerformative(ACLMessage.FAILURE);
+				}
+							
+				//System.err.println(reply.getInReplyTo());
+				//System.err.println(reply.getConversationId());
 				
 				myAgent.send(reply);
 			}
@@ -217,5 +237,18 @@ public class ResourceAgent extends Agent {
 			}
 		}
 	} 
+	
+
+	
+	//listen for reservation cancellation requests
+	private class CancelServer extends CyclicBehaviour {
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 	
 }

@@ -7,5 +7,5 @@ public interface ResourceInterface {
 
 	public ResourceOfferRecord canSatisfy (Cost c);
 	
-	
+	public String makeReservation (Cost c);
 }
