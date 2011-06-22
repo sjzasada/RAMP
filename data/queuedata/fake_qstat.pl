@@ -6,7 +6,7 @@ use Sys::Hostname;
 $myname=hostname;
 
 $timefile="/tmp/".$myname.".timefile";
-$logname="ANL-Intrepid-2009-1.swf";
+$logname="/home/stefan/.workspace/RAMP/data/queuedata/ANL-Intrepid-2009-1.swf";
 
 $now=time;
 
