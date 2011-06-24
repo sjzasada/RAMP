@@ -49,20 +49,29 @@ while (my $line = <FILE2>) {
 	$endtime = $sub+$wait+$t;
 
 
+    if (($sub == -1) || ($t == -1) || ($p == -1)) {
+        # something very fishy: job arrival, runtime, or processors undefined.
+        next;
+    }
+
+
 	#print "sub=".$sub." end=".$endtime." delta=".$deltatime."\n";
 
+
+	#not been submitted yet
 	if ($sub < $deltatime) {
 
+	#already finished
 	if ($endtime > $deltatime) {
 
 		if ($sub+$wait > $deltatime) {
-		$stat="R";
-} else {
-$stat="Q";
-}
+			$stat="Q";
+		} else {
+			$stat="R";
+		}	
 
 		print $myname.".".$job."\t".$u."\t".$p."\t".$treq."      \t".$stat."\n";
-		}
+	}
 	} else {
 		last;
 	}
