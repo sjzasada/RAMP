@@ -46,12 +46,20 @@ public class QstatInterface implements ResourceInterface {
 
             String line=null;
 
-
+            int usedCors = 0;
             
             while((line=input.readLine()) != null) {
             	
+            	String [] vals = line.split("\t");
+            	
+            	if (vals[4].equals("R")) {
+            		usedCors = usedCors + Integer.parseInt(vals[2]);
+            	}
+            	
             }
 
+            System.out.println("Cores used = "+usedCors);
+            
             //int exitVal = pr.waitFor();
             
         } catch(Exception e) {
