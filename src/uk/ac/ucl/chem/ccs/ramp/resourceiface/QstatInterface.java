@@ -11,6 +11,8 @@ package uk.ac.ucl.chem.ccs.ramp.resourceiface;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
@@ -20,6 +22,13 @@ public class QstatInterface implements ResourceInterface {
 
 	private String qstat="/home/stefan/.workspace/RAMP/data/queuedata/fake_qstat.pl";
 	private String qrstat="/home/stefan/.workspace/RAMP/data/queuedata/fake_qrstat.pl";
+	
+	
+	private int timeperiod=600;
+	private int maxcores = 163840;
+	
+	
+	private HashMap<Long, Integer> model = new HashMap<Long, Integer>();
 	
 	@Override
 	public ResourceOfferRecord canSatisfy(Cost c) {
@@ -36,7 +45,7 @@ public class QstatInterface implements ResourceInterface {
 	
 	public void updateState() {
 		
-		Vector lines = new Vector();
+		Vector<JobObject> lines = new Vector<JobObject>();
 		
         try {
             Runtime rt = Runtime.getRuntime();
@@ -52,15 +61,56 @@ public class QstatInterface implements ResourceInterface {
             	
             	String [] vals = line.split("\t");
             	
+            	boolean running=false;
+            	
+            	//model assumes FIFO
             	if (vals[4].equals("R")) {
-            		usedCors = usedCors + Integer.parseInt(vals[2]);
+            		running=true;
+
             	}
+        		lines.add(new JobObject(Integer.parseInt(vals[3]), Integer.parseInt(vals[2]), running));
+            	
             	
             }
 
-            System.out.println("Cores used = "+usedCors);
             
             //int exitVal = pr.waitFor();
+            
+            long time = 0;//seconds
+            
+            //build model from data
+            while (!lines.isEmpty()) {
+            	
+            	int cores=0;
+            	
+            	int index=0;
+            	Enumeration<JobObject> e = lines.elements();
+            	 while (e.hasMoreElements()) {
+            		 JobObject jo = e.nextElement();
+            	
+            		 //need to check if job has finished at this timepoint
+            		 
+            		 if (jo.isRunning() && jo.getEnd() < time) {
+            			lines.remove(index); 
+            			 
+            			//TODO: what next? 
+            			
+            		 } 
+            		 
+            		 if (jo.isRunning()) {
+            			 cores=cores+jo.getCores();
+            		 }
+            		 
+            	 }
+            	 
+            	 
+            	 
+            	//add this timepoint to the model
+            	model.put(new Long(time), new Integer(cores));
+            	
+            	time = time + timeperiod;
+            	index++;
+            }
             
         } catch(Exception e) {
             System.out.println(e.toString());
@@ -89,42 +139,99 @@ public class QstatInterface implements ResourceInterface {
 	}
 	
 	
-	private class LineData {
+//	private class LineData {
+//		
+//		private int procs;
+//		private int time;
+//		/**
+//		 * @return the procs
+//		 */
+//		public int getProcs() {
+//			return procs;
+//		}
+//		/**
+//		 * @param procs the procs to set
+//		 */
+//		public void setProcs(int procs) {
+//			this.procs = procs;
+//		}
+//		/**
+//		 * @return the time
+//		 */
+//		public int getTime() {
+//			return time;
+//		}
+//		/**
+//		 * @param time the time to set
+//		 */
+//		public void setTime(int time) {
+//			this.time = time;
+//		}
+//		/**
+//		 * @param procs
+//		 * @param time
+//		 */
+//		public LineData(int procs, int time) {
+//			this.procs = procs;
+//			this.time = time;
+//		}
+//		
+//		
+//		
+//	}
+	
+	private class JobObject {
 		
-		private int procs;
-		private int time;
+		private int end;
+		private int cores;
+		private boolean running;
 		/**
-		 * @return the procs
+		 * @param end
+		 * @param cores
+		 * @param running
 		 */
-		public int getProcs() {
-			return procs;
+		public JobObject(int end, int cores, boolean running) {
+			this.end = end;
+			this.cores = cores;
+			this.running = running;
 		}
 		/**
-		 * @param procs the procs to set
+		 * @return the end
 		 */
-		public void setProcs(int procs) {
-			this.procs = procs;
+		public int getEnd() {
+			return end;
 		}
 		/**
-		 * @return the time
+		 * @param end the end to set
 		 */
-		public int getTime() {
-			return time;
+		public void setEnd(int end) {
+			this.end = end;
 		}
 		/**
-		 * @param time the time to set
+		 * @return the cores
 		 */
-		public void setTime(int time) {
-			this.time = time;
+		public int getCores() {
+			return cores;
 		}
 		/**
-		 * @param procs
-		 * @param time
+		 * @param cores the cores to set
 		 */
-		public LineData(int procs, int time) {
-			this.procs = procs;
-			this.time = time;
+		public void setCores(int cores) {
+			this.cores = cores;
 		}
+		/**
+		 * @return the running
+		 */
+		public boolean isRunning() {
+			return running;
+		}
+		/**
+		 * @param running the running to set
+		 */
+		public void setRunning(boolean running) {
+			this.running = running;
+		}
+		
 		
 		
 		
