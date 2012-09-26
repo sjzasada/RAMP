@@ -1,3 +1,18 @@
+RAMP commands:
+--------------
+User agent config
+jade.Boot -container -local-host localhost -port 9001  buyer:uk.ac.ucl.chem.ccs.ramp.user.UserAgent("C:\Users\stef\Desktop\rfqs")
+
+Root agent config
+jade.Boot -gui -host localhost -port 9001  seller:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("10")
+
+User Gui
+uk.ac.ucl.chem.ccs.ramp.user.UserGui
+
+
+
+Example agents:
+---------------
 To run the container
 
 -gui -host localhost -port 9001
