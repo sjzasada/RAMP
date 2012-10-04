@@ -93,6 +93,7 @@ public class UserAgent extends Agent {
 			} else {
 
 				Request myRequest = new Request();	
+				myRequest.load(argument); //load the request file
 				displayMessage("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
 
 				requestQuote(myRequest);
@@ -162,6 +163,8 @@ public class UserAgent extends Agent {
 	//method to begin a negotiation
 	public void requestQuote (Request r) {
 
+		
+		
 		Random generator = new Random();
 		int id = generator.nextInt();
 		String requestID = getName()+id;
@@ -169,6 +172,7 @@ public class UserAgent extends Agent {
 
 		Vector<Request> v = new Vector<Request>();
 		v.add(r);
+		
 		//add the single request to the vector
 		addBehaviour(new RequestAQuote(requestID, v));
 	}
@@ -196,7 +200,8 @@ public class UserAgent extends Agent {
 
 		private RequestAQuote (String requestID, Vector<Request> request) {
 			this.requestID=requestID;
-			currentRequest = request;		
+			currentRequest = request;	
+			
 			twoStep = new SequentialBehaviour (myAgent);
 
 			offers.put(requestID, new Offers());
@@ -257,7 +262,13 @@ public class UserAgent extends Agent {
 			deadline = System.currentTimeMillis() + 120000;
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
-			this.requests=requests;
+			this.requests=request;
+			
+			//test code
+			if (requests==null) {
+				System.err.println("Requests is null");
+			}
+			
 			this.requestID=requestID;
 		}
 

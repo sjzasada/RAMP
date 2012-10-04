@@ -30,13 +30,11 @@ public class QstatInterface implements ResourceInterface {
 	
 	private HashMap<Long, Integer> model = new HashMap<Long, Integer>();
 	
-	@Override
 	public ResourceOfferRecord canSatisfy(Cost c) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public String makeReservation(Cost c) {
 		// TODO Auto-generated method stub
 		return null;

@@ -252,7 +252,7 @@ public class Request {
     	Resource r = new DefaultResource();
     	
     	r.setARCHITECTURE(rfq.getRequest().getArchitecture());
-    	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString());
+    	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString()); //need to change this to check for nulls in the doc
     	r.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
     	r.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
     	r.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());

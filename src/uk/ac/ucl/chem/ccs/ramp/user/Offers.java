@@ -23,7 +23,13 @@ public class Offers {
 	
 	//manipulate table of best offers
 	public Offer getBestOffer(String reservationID) {	
-		return bestoffers.get(reservationID).getTheCost();
+		Coster cost=bestoffers.get(reservationID);
+		
+		if (cost != null) {
+			return cost.getTheCost();
+		} else {
+			return null;
+		}
 	}
 	
 	public AID getBestAgent(String reservationID) {

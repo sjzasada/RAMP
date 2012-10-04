@@ -20,7 +20,7 @@ public class TestInterface implements ResourceInterface {
 	/* (non-Javadoc)
 	 * @see uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface#canSatisfy(uk.ac.ucl.chem.ccs.ramp.rfq.Request)
 	 */
-	@Override
+	
 	public ResourceOfferRecord canSatisfy(Cost c) {
 		// TODO Auto-generated method stub
 		
