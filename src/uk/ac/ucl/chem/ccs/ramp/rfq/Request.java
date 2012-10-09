@@ -251,15 +251,37 @@ public class Request {
     	
     	Resource r = new DefaultResource();
     	
-    	r.setARCHITECTURE(rfq.getRequest().getArchitecture());
-    	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString()); //need to change this to check for nulls in the doc
-    	r.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
-    	r.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
-    	r.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());
-    	r.setOSVERSION(rfq.getRequest().getOSVersion());
-    	r.setRAMPERCORE(rfq.getRequest().getRAMPerCore().toString());
-    	r.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
+    	if (rfq.getRequest().getArchitecture() != null) {
+    		r.setARCHITECTURE(rfq.getRequest().getArchitecture());
+    	}
     	
+    	if (rfq.getRequest().getCPUSpeed() != null) {
+        	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString()); //need to change this to check for nulls in the doc
+    	}
+    	
+    	if (rfq.getRequest().getInterNodeBandwidth() != null) {
+        	r.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
+    	}
+
+    	if (rfq.getRequest().getDisk() != null) {
+        	r.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
+    	}
+    	
+    	if (rfq.getRequest().getOperatingSystem() != null) {
+        	r.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());
+    	}
+    	
+    	if (rfq.getRequest().getOSVersion() != null) {
+        	r.setOSVERSION(rfq.getRequest().getOSVersion());
+    	}
+    	
+    	if (rfq.getRequest().getRAMPerCore() != null) {
+        	r.setRAMPERCORE(rfq.getRequest().getRAMPerCore().toString());
+    	}	
+    	
+    	if (rfq.getRequest().getDisk() != null) {
+        	r.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
+    	}
     	
     	Cores co = new DefaultCores();
     	

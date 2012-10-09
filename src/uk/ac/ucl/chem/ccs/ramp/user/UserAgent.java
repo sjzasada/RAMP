@@ -114,6 +114,7 @@ public class UserAgent extends Agent {
 		}
 
 		//check for resource agents
+		//TODO: Should this be after GUI call?
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			protected void onTick () {
 				DFAgentDescription template = new DFAgentDescription();
@@ -177,6 +178,8 @@ public class UserAgent extends Agent {
 		addBehaviour(new RequestAQuote(requestID, v));
 	}
 
+	
+	//TODO: request multiple resources
 	public void requestQuote (Vector<Request> v) {
 
 	}
