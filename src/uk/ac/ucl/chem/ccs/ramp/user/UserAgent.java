@@ -72,6 +72,26 @@ public class UserAgent extends Agent {
 
 		//register the content language 
 
+		//check for resource agents
+		//TODO: Should this be after GUI call?
+		addBehaviour(new TickerBehaviour(this, 60000) {
+			protected void onTick () {
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("resource-trader");
+				template.addServices(sd);
+
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template);
+					resourceAgents.clear();
+					for (int i=0; i<result.length; ++i) {
+						resourceAgents.addElement(result[i].getName());
+					}
+				} catch (FIPAException fp) {
+					fp.printStackTrace();
+				}
+			}
+		});
 
 		// get the args to the prog - should be 1
 		Object args[] = getArguments();
@@ -113,26 +133,7 @@ public class UserAgent extends Agent {
 			displayMessage("- " +it.next());
 		}
 
-		//check for resource agents
-		//TODO: Should this be after GUI call?
-		addBehaviour(new TickerBehaviour(this, 60000) {
-			protected void onTick () {
-				DFAgentDescription template = new DFAgentDescription();
-				ServiceDescription sd = new ServiceDescription();
-				sd.setType("resource-trader");
-				template.addServices(sd);
 
-				try {
-					DFAgentDescription[] result = DFService.search(myAgent, template);
-					resourceAgents.clear();
-					for (int i=0; i<result.length; ++i) {
-						resourceAgents.addElement(result[i].getName());
-					}
-				} catch (FIPAException fp) {
-					fp.printStackTrace();
-				}
-			}
-		});
 
 
 
