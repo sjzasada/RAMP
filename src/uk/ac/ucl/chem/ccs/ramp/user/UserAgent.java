@@ -54,11 +54,11 @@ import jade.lang.acl.MessageTemplate;
 
 public class UserAgent extends Agent {
 
-
-
 	//Hash containing a hash of all of the offers made for a particular RequestID
-	private HashMap<String, Offers> offers = new HashMap<String, Offers>();
+	//private HashMap<String, Offers> offers = new HashMap<String, Offers>();
 
+	private HashMap<String, Vector> allRequests = new HashMap<String, Vector>();
+	
 	private Vector resourceAgents = new Vector();
 	UserGui myGui=null;
 
@@ -131,7 +131,7 @@ public class UserAgent extends Agent {
 		Iterator<String> it = getAID().getAllAddresses();
 		while (it.hasNext()) {
 			displayMessage("- " +it.next());
-		}
+		} 
 
 
 
@@ -162,27 +162,42 @@ public class UserAgent extends Agent {
 		//	this.doDelete();
 	}
 
+	//Negotiations
+	
 	//method to begin a negotiation
 	public void requestQuote (Request r) {
 
-		
-		
-		Random generator = new Random();
-		int id = generator.nextInt();
-		String requestID = getName()+id;
-		r.setRequestID(requestID);
-
+		//add the single request to a vector
 		Vector<Request> v = new Vector<Request>();
 		v.add(r);
 		
-		//add the single request to the vector
-		addBehaviour(new RequestAQuote(requestID, v));
+		//call the main requestQuote method
+		requestQuote(v);
+
 	}
 
-	
-	//TODO: request multiple resources
+	//request multiple resources
 	public void requestQuote (Vector<Request> v) {
+		//set a request ID
+		Random generator = new Random();
+		int id = generator.nextInt();
+		String requestID = getName()+id;
 
+		//iterate the vector, and update each request with the sub request ID
+		int subid=0;
+				
+		for (Request r : v) {
+			r.setRequestID(requestID+"-"+subid);
+			v.set(subid, r);
+			subid++;
+		}
+		
+		//add the current request(s) to the hashmap of request
+		allRequests.put(requestID, v);
+		
+		//start the behaviour with this set of requests
+		addBehaviour(new RequestAQuote(requestID));
+		
 	}
 
 	////////////////////////////////////////
@@ -195,20 +210,13 @@ public class UserAgent extends Agent {
 	//behaviour to hold all data associated with this request
 	private class RequestAQuote extends Behaviour {
 
-		boolean first=false;
-		private Vector<Request> currentRequest;
+		boolean first=true; //only do this once
 		private String requestID;
-
-
 		private SequentialBehaviour twoStep;
 
-		private RequestAQuote (String requestID, Vector<Request> request) {
-			this.requestID=requestID;
-			currentRequest = request;	
-			
+		private RequestAQuote (String requestID) {
+			this.requestID=requestID;//permanent reference to this set of requests
 			twoStep = new SequentialBehaviour (myAgent);
-
-			offers.put(requestID, new Offers());
 
 		}
 
@@ -221,16 +229,16 @@ public class UserAgent extends Agent {
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			if (!first) {
+			if (first) {
 				displayMessage("Starting parallel behaviour");
 
 				ParallelBehaviour pb = new ParallelBehaviour(myAgent, ParallelBehaviour.WHEN_ANY);
 
 				//add a parallel behaviour to run the bids
-				pb.addSubBehaviour(new RequestManager(myAgent, currentRequest, requestID));
+				pb.addSubBehaviour(new RequestManager(myAgent, requestID));
 
 				//add a second parallel behaviour to process offers
-				pb.addSubBehaviour(new ResourceNegotiator(requestID));
+				pb.addSubBehaviour(new ProcessOffers(requestID));
 
 
 				twoStep.addSubBehaviour(pb);
@@ -238,7 +246,7 @@ public class UserAgent extends Agent {
 				//when pb has finished, run the notifier
 				twoStep.addSubBehaviour(new ResourceNotifier(requestID));
 				addBehaviour(twoStep);
-				first=true;
+				first=false;
 			} else {
 
 				//wait until the requester is done, then once it is, notify winners
@@ -261,12 +269,12 @@ public class UserAgent extends Agent {
 		private int round = 0;
 		private String requestID;
 
-		private RequestManager (Agent a, Vector<Request> request, String requestID) {
-			super (a, 30000);
-			deadline = System.currentTimeMillis() + 120000;
+		private RequestManager (Agent a, String requestID) {
+			super (a, 30000);//30 second tick - could be changable parameter
+			deadline = System.currentTimeMillis() + 120000;//go for 2 mins - could be a changable parameter
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
-			this.requests=request;
+			this.requests=allRequests.get(requestID);
 			
 			//test code
 			if (requests==null) {
@@ -279,19 +287,13 @@ public class UserAgent extends Agent {
 		public void onTick () {
 			long currentTime = System.currentTimeMillis();
 
-
-
 			//check if we should finish bidding
 			if (currentTime > deadline) {
 				displayMessage("Deadline passed, stopping requesting");
 				stop();
 			} else {
-
-				Offers theOffers = offers.get(requestID);
-
 				displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
 				displayMessage("Bidding round " + ++round);
-
 
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);				
 				Iterator<AID> it = resourceAgents.iterator();
@@ -302,7 +304,6 @@ public class UserAgent extends Agent {
 				//displayMessage("Polling sellers");
 
 				//TODO: make the message more comprehensive
-
 
 				cfp.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 				cfp.setOntology(MarketOntology.ONTOLOGY_NAME);
@@ -316,29 +317,12 @@ public class UserAgent extends Agent {
 
 				MakeRequest req = new DefaultMakeRequest();
 
-				Iterator<Request> reqit = requests.iterator();
-
 				//add each subrequest
-				while (reqit.hasNext()) {
-
-					Request r = reqit.next();
-
-
-					//TODO: need to check cost is better than request
-
-					Offer o = theOffers.getBestOffer(requestID);
-					//if an offer has already been made, lower the price
-					if (o != null) {
-
-						int bestCost = Integer.parseInt(o.getOFFERCOST().getCPUHOURCOST());
-
-						if (bestCost < r.getCPUCost()) {
-							r.setCPUCost(bestCost);
-						}
-					}
-
+				for (Request r : requests) {
 					req.addRFQINSTANCE(r.getRFQObject());
 				}
+				
+				Iterator<Request> reqit = requests.iterator();
 
 
 				//add onto object to message 
@@ -352,8 +336,6 @@ public class UserAgent extends Agent {
 				//send the message
 				myAgent.send(cfp);
 
-
-
 			}
 
 		}
@@ -363,7 +345,7 @@ public class UserAgent extends Agent {
 
 
 	//process received offers
-	private class ResourceNegotiator extends Behaviour {
+	private class ProcessOffers extends Behaviour {
 
 		private String requestID;
 		private int step = 0;
@@ -372,7 +354,7 @@ public class UserAgent extends Agent {
 
 		private MessageTemplate mt;
 
-		ResourceNegotiator (String requestID) {
+		ProcessOffers (String requestID) {
 			this.requestID=requestID;
 			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("compute-auction-"+requestID),
 					MessageTemplate.MatchInReplyTo("cfp"+requestID));
@@ -381,7 +363,6 @@ public class UserAgent extends Agent {
 
 		public void action () {
 
-			Offers theOffers = offers.get(requestID);
 
 			ACLMessage reply = myAgent.receive(mt);
 			if (reply != null) {
