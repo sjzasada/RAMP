@@ -136,7 +136,7 @@ public class ResourceAgent extends Agent {
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();
 						 
-						 ResourceOfferRecord ror = resInter.canSatisfy(rfq.getCOST());
+						 ResourceOfferRecord ror = resInter.canSatisfy(rfq.getCOST());//check we can satisfy the offer
 						 
 						 					 
 						 if (ror != null) {
@@ -145,7 +145,7 @@ public class ResourceAgent extends Agent {
 								int id = generator.nextInt();
 								
 							 ror.setOfferID(myAgent.getName()+id);
-							 ror.setRequestID(rfq.getREQUESTID());
+							 ror.setRequestID(rfq.getREQUESTID());//request ID is set from RFQ - I think this is ok
 							 
 							 currentOffers.put(rfq.getREQUESTID(), ror);
 							 

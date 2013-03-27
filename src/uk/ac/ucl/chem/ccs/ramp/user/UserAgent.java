@@ -55,16 +55,19 @@ import jade.lang.acl.MessageTemplate;
 public class UserAgent extends Agent {
 
 	//Hash containing a hash of all of the offers made for a particular RequestID
-	//private HashMap<String, Offers> offers = new HashMap<String, Offers>();
+	private HashMap<String, OfferList<ReceivedOffer>> allOffers = new HashMap<String, OfferList<ReceivedOffer>>();
+	private HashMap<String, Request> allRequests = new HashMap<String, Request>();
+	private HashMap<String, Vector<String>> subRequests = new HashMap<String, Vector<String>>();
 
-	private HashMap<String, Vector> allRequests = new HashMap<String, Vector>();
-	
-	private Vector resourceAgents = new Vector();
-	UserGui myGui=null;
+	private Vector resourceAgents = new Vector(); //this stores all of the resource agents
+	UserGui myGui=null; //create a new gui
 
+	//sort out the communications ontologu
 	private Codec codec = new SLCodec(); 
 	private Ontology onto = MarketOntology.getInstance();
 
+
+	//set up agent
 	protected void setup () {
 
 		getContentManager().registerLanguage(codec);
@@ -72,20 +75,19 @@ public class UserAgent extends Agent {
 
 		//register the content language 
 
-		//check for resource agents
-		//TODO: Should this be after GUI call?
+		//check for resource agents periodically
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			protected void onTick () {
 				DFAgentDescription template = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
-				sd.setType("resource-trader");
+				sd.setType("resource-trader"); //define a template of the kind of agents we are looking for
 				template.addServices(sd);
 
 				try {
-					DFAgentDescription[] result = DFService.search(myAgent, template);
+					DFAgentDescription[] result = DFService.search(myAgent, template); //search for resource agents
 					resourceAgents.clear();
 					for (int i=0; i<result.length; ++i) {
-						resourceAgents.addElement(result[i].getName());
+						resourceAgents.addElement(result[i].getName()); //add the agents found to the vector 
 					}
 				} catch (FIPAException fp) {
 					fp.printStackTrace();
@@ -104,14 +106,14 @@ public class UserAgent extends Agent {
 
 			File f = new File(argument);
 			if (f.isDirectory()) {
-
+				//open a GUI and load the directory of requests
 				myGui=new UserGui(this);
 				myGui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				myGui.setVisible(true);
 				myGui.loadDir(argument);
 
 			} else {
-
+				//operate cmd line, with just a request file
 				Request myRequest = new Request();	
 				myRequest.load(argument); //load the request file
 				displayMessage("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
@@ -119,6 +121,7 @@ public class UserAgent extends Agent {
 				requestQuote(myRequest);
 			}
 		} else {
+			//open a blank gui
 			myGui=new UserGui(this);
 			myGui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			myGui.setVisible(true);
@@ -141,7 +144,7 @@ public class UserAgent extends Agent {
 	}
 
 
-	//display a message from the agent
+	//display a message from the agent, if the GUI is open, do it in the GUI, otherwise, do it on cmd line
 	public void displayMessage (final String s) {
 		if (myGui != null) {
 			Runnable addIt = new Runnable () {
@@ -162,15 +165,18 @@ public class UserAgent extends Agent {
 		//	this.doDelete();
 	}
 
+	//end agent setup
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Negotiations
-	
+
 	//method to begin a negotiation
 	public void requestQuote (Request r) {
 
 		//add the single request to a vector
 		Vector<Request> v = new Vector<Request>();
 		v.add(r);
-		
+
 		//call the main requestQuote method
 		requestQuote(v);
 
@@ -185,19 +191,23 @@ public class UserAgent extends Agent {
 
 		//iterate the vector, and update each request with the sub request ID
 		int subid=0;
-				
+
+		Vector<String> subReqs = new Vector<String>();
+
 		for (Request r : v) {
 			r.setRequestID(requestID+"-"+subid);
-			v.set(subid, r);
+			allRequests.put(requestID, r);
+			subReqs.add(requestID+"-"+subid);
 			subid++;
 		}
-		
+
 		//add the current request(s) to the hashmap of request
-		allRequests.put(requestID, v);
-		
+
+		subRequests.put(requestID, subReqs);
+
 		//start the behaviour with this set of requests
 		addBehaviour(new RequestAQuote(requestID));
-		
+
 	}
 
 	////////////////////////////////////////
@@ -274,13 +284,18 @@ public class UserAgent extends Agent {
 			deadline = System.currentTimeMillis() + 120000;//go for 2 mins - could be a changable parameter
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
-			this.requests=allRequests.get(requestID);
-			
+			this.requestID=requestID;
+			Vector<String> v = subRequests.get(requestID);
+
+			for (String s : v) {
+				this.requests.add(allRequests.get(s));//vector containing all subrequests. 
+			}
+
 			//test code
 			if (requests==null) {
 				System.err.println("Requests is null");
 			}
-			
+
 			this.requestID=requestID;
 		}
 
@@ -317,12 +332,19 @@ public class UserAgent extends Agent {
 
 				MakeRequest req = new DefaultMakeRequest();
 
+
+				//TODO: Check for existing offers. If we have a better one, make that the new bidding target. 
+				//TODO: !!!!!!!!!!!!!!
+				//TODO: !!!!!!!!!!!!!!
+
 				//add each subrequest
+				int i = 0;
 				for (Request r : requests) {
 					req.addRFQINSTANCE(r.getRFQObject());
+					i++;
 				}
-				
-				Iterator<Request> reqit = requests.iterator();
+
+				//Iterator<Request> reqit = requests.iterator();
 
 
 				//add onto object to message 
@@ -384,20 +406,34 @@ public class UserAgent extends Agent {
 						// process the offers received 
 						while (itr.hasNext()) {
 							Offer myOffer=itr.next();
-
-							String currentRequest = myOffer.getREQUESTID();
-
-							Offer best = theOffers.getBestOffer(currentRequest);
-
+							String currentRequestID = myOffer.getREQUESTID();//use request ID set by offer
 							displayMessage("Recieved offer " + myOffer.getOFFERID() + " from " + responder);
 
-							//check if this is the best offer or not
-							if (best == null) {
-								theOffers.setBestOffer(currentRequest, responder, myOffer);
-							} else if (RequestEvaluator.naiveEvaluator(best, myOffer)) {
-								theOffers.setBestOffer(currentRequest, responder, myOffer);								
+							//check offer meets request
+							Request currentRequest = allRequests.get(currentRequestID);
+							if (!RequestEvaluator.offerMeetsRequest(myOffer, currentRequest)) {
+								//reject offer
+								ACLMessage reject = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+								reject.addReceiver(responder);
+								reject.setContent(myOffer.getOFFERID());
+								reject.setReplyWith("order"+requestID);
+								reject.setConversationId("reject"+requestID);
+								myAgent.send(reject);
+
+							} else {
+
+								OfferList ol = allOffers.get(currentRequest);
+
+								if (ol == null) {
+									ol = new OfferList<ReceivedOffer>();
+									ol.add(new ReceivedOffer (responder, myOffer));
+								} else {
+									ol.addSorted(new ReceivedOffer (responder, myOffer));
+								}
+
+								//store the latest, sorted offers for this (sub)-request
+								allOffers.put(currentRequestID, ol);
 							}
-							theOffers.addOffer(responder, currentRequest, myOffer);
 						}
 
 
@@ -411,9 +447,6 @@ public class UserAgent extends Agent {
 
 					//String conv= reply.getConversationId();
 					//System.err.println("Conversation " + conv);
-
-					//store the new offers object
-					offers.put(requestID, theOffers);
 
 				}
 				repliesCount++;
@@ -434,19 +467,25 @@ public class UserAgent extends Agent {
 
 		public boolean done () {
 
-			return step == 2;
+			return step == 2;//parallel behaviours end when first behaviour ends
 		}
 	}
 
 	private class ResourceNotifier extends Behaviour {
 
 		private String requestID; 
-		private int step=1;
-		private MessageTemplate mt;
-		private Offers theOffers;
+		//private int step=1;
+		//private MessageTemplate mt;
+		private int noUnits = 0;
+		private int confirmedOffers = 0;
+		private HashMap<String, ReceivedOffer> negotiatedOffers = new HashMap<String, ReceivedOffer>();
+		private SequentialBehaviour twoPhase;
+		private boolean fail=false;
+
 		private ResourceNotifier (String requestID) {
 			this.requestID = requestID;
-			theOffers = offers.get(requestID);
+			noUnits=subRequests.get(requestID).size();//number of units to look for
+			twoPhase = new SequentialBehaviour (myAgent);
 		}
 
 		@Override
@@ -454,90 +493,167 @@ public class UserAgent extends Agent {
 			// TODO Auto-generated method stub
 
 			displayMessage("Negotiating sale");
-			switch (step) {
 
-			case 1:
+			//check we have enough offers
+			int unitOffers=0;
 
-				//single unit case
-				//TODO: extend for multiunit
+			Vector<String> v = subRequests.get(requestID);
+			Iterator<String> itr = v.iterator();
 
-				Offer bestOffer = theOffers.getBestOffer(requestID);
-				AID bestAgent = theOffers.getBestAgent(requestID);
-
-				//TODO: make sure best offer meets request
-
-				if (bestOffer != null) {
-					//TODO: implement the offer evaluation
-					displayMessage("Best offer (" + bestOffer.getOFFERID() + ")from " +bestAgent);
-
-					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-					order.addReceiver(bestAgent);
-					order.setContent(bestOffer.getOFFERID());
-					order.setReplyWith("order"+requestID);
-					order.setConversationId("accept"+requestID);
-					myAgent.send(order);
-
-					System.err.println(bestOffer.getOFFERCOST().getCPUHOURCOST());
-					System.err.println(order.getReplyWith());
-
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("accept"+requestID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
-					step=2;
-				} else {
-					displayMessage("No bids received");
-					step=3;
+			while (itr.hasNext()) {
+				String key = itr.next();
+				if (allOffers.containsKey(key)) {
+					unitOffers++;
 				}
-				break;
+			}
 
-			case 2:
+			if (noUnits == unitOffers) {	
+				//We have enough offers, so start negotiating
 
-				ACLMessage reply = myAgent.receive(mt);
+				ParallelBehaviour phase1 = new ParallelBehaviour(myAgent, ParallelBehaviour.WHEN_ALL);
+				ParallelBehaviour phase2 = new ParallelBehaviour(myAgent, ParallelBehaviour.WHEN_ALL);
+				v = subRequests.get(requestID);
+				itr = v.iterator();
 
-
-
-				if(reply != null) {
-					System.err.println("case 2 reached");
-
-					if (reply.getPerformative() == ACLMessage.INFORM) {
-						//sucessfully made the bargin
-						displayMessage("Done!");
-					} else {
-						displayMessage("Not successful");
-					}
-
-					step=3;
-				} else {
-					block();
-					System.err.println("blocking");
+				//create parallel behaviours for each sub unti, and begin negotiating
+				while (itr.hasNext()) {
+					String key = itr.next();
+					phase1.addSubBehaviour(new PhaseOneBehaviour(key));					
+					phase2.addSubBehaviour(new PhaseOneBehaviour(key));
 				}
-				break;
 
-			case 4:
-				
-				
-			case 5:
-				
+				//Run the parallel behaviours one after the other.  
+				twoPhase.addSubBehaviour(phase1);
+				twoPhase.addSubBehaviour(phase2);
+				addBehaviour(twoPhase);
 
+				//TODO: need to do cleanup here. 
+
+			} else {
+				fail = true;
+				displayMessage("Insufficient bids received");
 			}
 
 		}
 
+
+
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
-			return step==3;
+			if (twoPhase.done() || fail) {
+				return true; 
+			} else {
+				return false;
+			}
 		}
 
+		//run the phase one negotiation - confirm all the received offers
+		//and if an offer is not received, then tell the next offer etc until failure. 
 
 
+		private class PhaseOneBehaviour extends Behaviour {
+			private int step=1;
+			private int offerNo=1;
+			private OfferList<ReceivedOffer> subOffers; 
+			private String subID;
+			private MessageTemplate mt;
+			private ReceivedOffer bestOffer;
+
+			public PhaseOneBehaviour(String key) {
+				subOffers = allOffers.get(key);
+				subID=key;
+			}
+
+			@Override
+			public void action() {
+
+				switch (step) {
+				case 1:
+
+					//TODO: implement the offer evaluation
+					bestOffer=(ReceivedOffer)subOffers.get(offerNo);
+
+					displayMessage("Best offer (" + bestOffer.getOffer().getOFFERID() + ")from " +bestOffer.getAgent());
+
+					ACLMessage order = new ACLMessage(ACLMessage.CONFIRM);
+					order.addReceiver(bestOffer.getAgent());
+					order.setContent(bestOffer.getOffer().getOFFERID());
+					order.setReplyWith("order"+subID);
+					order.setConversationId("accept"+subID);
+					myAgent.send(order);
+
+					System.err.println(bestOffer.getOffer().getOFFERCOST().getCPUHOURCOST());
+					System.err.println(order.getReplyWith());
+
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("accept"+subID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+					step=2;
+
+					break;
+
+				case 2:
+
+					ACLMessage reply = myAgent.receive(mt);
+
+					if(reply != null) {
+						AID responder = reply.getSender();
+						System.err.println("case 2 reached");
+
+						if (reply.getPerformative() == ACLMessage.AGREE) {
+							//successfully made the bargain
+							displayMessage("Recieved accepted offer from " + responder);
+							negotiatedOffers.put(subID, bestOffer);
+							confirmedOffers++;
+
+							step=3;
+						} else {
+							displayMessage("Offer withdrawn by " + responder);
+							step=1;
+							offerNo++; //loop to the next offer
+						}
+
+					} else {
+						block();
+						System.err.println("blocking");
+					}
+					break;
+				}//end switch
+			}//end method
+
+			@Override
+			public boolean done() {
+				// TODO Auto-generated method stub
+				return step==3;
+			}
+
+		}
+
+		//when all of the offers have been confirmed, buy the units
+		private class PhaseTwoBehaviour extends Behaviour {
+
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public boolean done() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+		}
 	}
-	
-	
+
+
+
 	//listen for offer withdraw requests
 	private class OfferWithdrawServer extends CyclicBehaviour {
 
 		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.DISCONFIRM);
 
-		
+
 		public void action() {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
@@ -545,25 +661,25 @@ public class UserAgent extends Agent {
 				//TODO: pull out offer and remove
 				//need to update Offers object to rank offers sorted
 			}
-			
+
 		}
-		
+
 	}
-	
-	
+
+
 	//list for renegotiate messages
 	private class RenegotiateBehaviour extends CyclicBehaviour {
 
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 
 }
 
