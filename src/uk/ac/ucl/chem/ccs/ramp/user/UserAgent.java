@@ -519,7 +519,7 @@ public class UserAgent extends Agent {
 				while (itr.hasNext()) {
 					String key = itr.next();
 					phase1.addSubBehaviour(new PhaseOneBehaviour(key));					
-					phase2.addSubBehaviour(new PhaseOneBehaviour(key));
+					phase2.addSubBehaviour(new PhaseTwoBehaviour(key));
 				}
 
 				//Run the parallel behaviours one after the other.  
@@ -528,7 +528,8 @@ public class UserAgent extends Agent {
 				addBehaviour(twoPhase);
 
 				//TODO: need to do cleanup here. 
-
+				displayMessage("All done!");
+				
 			} else {
 				fail = true;
 				displayMessage("Insufficient bids received");
@@ -541,7 +542,7 @@ public class UserAgent extends Agent {
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
-			if (twoPhase.done() || fail) {
+			if (twoPhase.done()) {
 				return true; 
 			} else {
 				return false;
@@ -576,17 +577,17 @@ public class UserAgent extends Agent {
 
 					displayMessage("Best offer (" + bestOffer.getOffer().getOFFERID() + ")from " +bestOffer.getAgent());
 
-					ACLMessage order = new ACLMessage(ACLMessage.CONFIRM);
+					ACLMessage order = new ACLMessage(ACLMessage.AGREE);
 					order.addReceiver(bestOffer.getAgent());
 					order.setContent(bestOffer.getOffer().getOFFERID());
 					order.setReplyWith("order"+subID);
-					order.setConversationId("accept"+subID);
+					order.setConversationId("agree"+subID);
 					myAgent.send(order);
 
-					System.err.println(bestOffer.getOffer().getOFFERCOST().getCPUHOURCOST());
-					System.err.println(order.getReplyWith());
+					displayMessage(bestOffer.getOffer().getOFFERCOST().getCPUHOURCOST());
+					displayMessage(order.getReplyWith());
 
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("accept"+subID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("agree"+subID), MessageTemplate.MatchInReplyTo("order"+subID));
 					step=2;
 
 					break;
@@ -609,7 +610,9 @@ public class UserAgent extends Agent {
 						} else {
 							displayMessage("Offer withdrawn by " + responder);
 							step=1;
+
 							offerNo++; //loop to the next offer
+							
 						}
 
 					} else {
@@ -630,17 +633,68 @@ public class UserAgent extends Agent {
 
 		//when all of the offers have been confirmed, buy the units
 		private class PhaseTwoBehaviour extends Behaviour {
-
+			private int step=1;
+			private String subID;
+			private MessageTemplate mt;
+			private ReceivedOffer finalOffer;
+			
+			public PhaseTwoBehaviour(String key) {
+				subID=key;
+				finalOffer=negotiatedOffers.get(key);
+			}
+			
 			@Override
 			public void action() {
-				// TODO Auto-generated method stub
+				//check that all the offers have been accepted. If not, cancel this offer. 
+		
+				switch (step) {
 
+				case 1:
+					
+				if (confirmedOffers != noUnits) {
+					fail=true;
+					ACLMessage cancel = new ACLMessage(ACLMessage.CANCEL);
+					cancel.addReceiver(finalOffer.getAgent());
+					cancel.setContent(finalOffer.getOffer().getOFFERID());
+					cancel.setConversationId("cancel"+subID);
+					myAgent.send(cancel);
+					step =3;
+					break;
+				} else {
+					ACLMessage finalise = new ACLMessage(ACLMessage.CONFIRM);
+					finalise.addReceiver(finalOffer.getAgent());
+					finalise.setContent(finalOffer.getOffer().getOFFERID());
+					finalise.setReplyWith("confirm"+subID);
+					finalise.setConversationId("confirm"+subID);
+					myAgent.send(finalise);
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("confirm"+subID), MessageTemplate.MatchInReplyTo("confirm"+subID));
+					step=2;
+				}
+				
+				case 2:
+					ACLMessage reply = myAgent.receive(mt);
+
+					if(reply != null) {
+						if (reply.getPerformative() == ACLMessage.CONFIRM) {
+							displayMessage(reply.getContent());
+							//display the reservation ID
+						} else {
+							fail=true;
+						}
+						
+						step=3;
+
+					} else {
+						block();
+					}
+					break;
+				}//end switch
 			}
 
 			@Override
 			public boolean done() {
 				// TODO Auto-generated method stub
-				return false;
+				return step==3;
 			}
 
 		}
