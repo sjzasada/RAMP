@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
+import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer.Status;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
@@ -45,7 +46,7 @@ import jade.lang.acl.MessageTemplate;
 
 public class ResourceAgent extends Agent {
 
-	private HashMap<String, ResourceOfferRecord> currentOffers = new HashMap<String, ResourceOfferRecord>();
+	private HashMap<String, FirmOffer> currentOffers = new HashMap<String, FirmOffer>();
 	private int minPrice;
 	private ResourceInterface resInter;
 	
@@ -147,7 +148,9 @@ public class ResourceAgent extends Agent {
 							 ror.setOfferID(myAgent.getName()+id);
 							 ror.setRequestID(rfq.getREQUESTID());//request ID is set from RFQ - I think this is ok
 							 
-							 currentOffers.put(rfq.getREQUESTID(), ror);
+							 FirmOffer fo = new FirmOffer(ror, Status.MADE);
+							 
+							 currentOffers.put(rfq.getREQUESTID(), fo);
 							 
 							 	// we can respond
 							 	anyOffers = true;
@@ -192,7 +195,7 @@ public class ResourceAgent extends Agent {
 	
 	private class PurchaseOrdersServer extends CyclicBehaviour {
 		
-		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.AGREE);
 
 		
 		public void action() {
@@ -200,26 +203,30 @@ public class ResourceAgent extends Agent {
 			if (msg != null) {
 				// ACCEPT_PROPOSAL Message received. Process it
 				
-				String offerID = msg.getContent();
+				String offerID = msg.getContent();//TODO - check this is the way to get the offer ID
 				ACLMessage reply = msg.createReply();
 				
 				if (currentOffers.containsKey(offerID)) {
 					
-					ResourceOfferRecord ror = currentOffers.get(offerID);
+					FirmOffer fo = currentOffers.get(offerID);
 					
-					String reservationID = resInter.makeReservation(ror.getOffer().getOFFERCOST());
+					String reservationID = resInter.makeReservation(fo.getRor().getOffer().getOFFERCOST());
 					
 					
 					if (reservationID != null) {
+						fo.setReservationID(reservationID);
+						fo.setStatus(Status.CONFIRMED);
+						currentOffers.put(offerID, fo);
+						
 						reply.setContent(reservationID);
-						reply.setPerformative(ACLMessage.INFORM);
+						reply.setPerformative(ACLMessage.AGREE);
 						System.out.println("Made deal with agent "+msg.getSender().getName() + " reservation " + reservationID);
 					} else {
 						//can't now satisfy
 						reply.setPerformative(ACLMessage.REFUSE);
+						currentOffers.remove(offerID);
 					}
 					
-					currentOffers.remove(offerID);
 					
 				} else {
 					//we didn't make the offer. what are you doing?
