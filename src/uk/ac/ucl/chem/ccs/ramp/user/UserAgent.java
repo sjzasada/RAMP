@@ -577,7 +577,7 @@ public class UserAgent extends Agent {
 
 					displayMessage("Best offer (" + bestOffer.getOffer().getOFFERID() + ")from " +bestOffer.getAgent());
 
-					ACLMessage order = new ACLMessage(ACLMessage.AGREE);
+					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 					order.addReceiver(bestOffer.getAgent());
 					order.setContent(bestOffer.getOffer().getOFFERID());
 					order.setReplyWith("order"+subID);
