@@ -27,8 +27,8 @@ public class TestInterface implements ResourceInterface {
 		ResourceOfferRecord ror = new ResourceOfferRecord(minCPUCost, c);
 		
 		Random generator = new Random();
-		float prob = generator.nextFloat();
-		
+		//float prob = generator.nextFloat();
+		float prob = 1.0f;
 		if (prob > 0.5) {
 			return ror;
 		}

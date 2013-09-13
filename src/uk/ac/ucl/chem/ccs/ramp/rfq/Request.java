@@ -29,6 +29,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.*;
 import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.*;
 
+//This class contains details of each request, and a copy of the marshalled RequestforQuotation document loaded by the user. 
+//It converts this to an RFQ object for agent interchange as necessary
+
 public class Request {
 
 	private ObjectFactory of;
@@ -285,7 +288,16 @@ public class Request {
     	
     	Cores co = new DefaultCores();
     	
-    	co.setDURATION(rfq.getRequest().getWallTime().toString());
+    	String duration;
+    	
+    	if (rfq.getRequest().getWallTime()==null) {
+    		duration="12";
+    	} else {
+    		duration=rfq.getRequest().getWallTime().toString();
+    	}
+    	
+    	
+    	co.setDURATION(duration);
     	co.setNODECORES(0);
     	co.setNODECOUNT(0);
     	co.setTOTALCORES(getCPUCount());
@@ -303,12 +315,13 @@ public class Request {
     
 	public RFQ getRFQObject() {
 		
-		RFQ rfq = new DefaultRFQ();
+		RFQ rfq2 = new DefaultRFQ();
 		
-		rfq.setCOST(getCostObject());
-		rfq.setREQUESTID(requestID);
+		rfq2.setCOST(getCostObject());
+		rfq2.setREQUESTID(requestID);
 		
-		return rfq;
+		
+		return rfq2;
 		
 	}
     

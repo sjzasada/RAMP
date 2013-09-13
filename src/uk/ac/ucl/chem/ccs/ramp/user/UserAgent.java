@@ -196,7 +196,7 @@ public class UserAgent extends Agent {
 
 		for (Request r : v) {
 			r.setRequestID(requestID+"-"+subid);
-			allRequests.put(requestID, r);
+			allRequests.put(requestID+"-"+subid, r);
 			subReqs.add(requestID+"-"+subid);
 			subid++;
 		}
@@ -227,6 +227,7 @@ public class UserAgent extends Agent {
 		private RequestAQuote (String requestID) {
 			this.requestID=requestID;//permanent reference to this set of requests
 			twoStep = new SequentialBehaviour (myAgent);
+			System.err.println ("Request ID " + requestID);
 
 		}
 
@@ -249,6 +250,7 @@ public class UserAgent extends Agent {
 
 				//add a second parallel behaviour to process offers
 				pb.addSubBehaviour(new ProcessOffers(requestID));
+				System.err.println ("Request ID " + requestID);
 
 
 				twoStep.addSubBehaviour(pb);
@@ -275,7 +277,7 @@ public class UserAgent extends Agent {
 
 		private long deadline, initTime, deltaT;
 
-		private Vector<Request> requests;
+		private Vector<Request> requests = new Vector<Request>();
 		private int round = 0;
 		private String requestID;
 
@@ -286,9 +288,11 @@ public class UserAgent extends Agent {
 			deltaT=deadline - initTime;
 			this.requestID=requestID;
 			Vector<String> v = subRequests.get(requestID);
+			System.err.println ("Request ID " + requestID);
 
 			for (String s : v) {
 				this.requests.add(allRequests.get(s));//vector containing all subrequests. 
+				System.err.println ("Adding subrequest " + s);
 			}
 
 			//test code
@@ -340,6 +344,7 @@ public class UserAgent extends Agent {
 				//add each subrequest
 				int i = 0;
 				for (Request r : requests) {
+					System.err.println("Request ID is: " + r.getRequestID() + " --- ffooo ");
 					req.addRFQINSTANCE(r.getRFQObject());
 					i++;
 				}
