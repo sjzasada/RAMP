@@ -26,8 +26,7 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.*;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.*;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.*;
 
 //This class contains details of each request, and a copy of the marshalled RequestforQuotation document loaded by the user. 
 //It converts this to an RFQ object for agent interchange as necessary
@@ -252,7 +251,7 @@ public class Request {
 
     public Cost getCostObject() {
     	
-    	Resource r = new DefaultResource();
+    	Resource r = new Resource();
     	
     	if (rfq.getRequest().getArchitecture() != null) {
     		r.setARCHITECTURE(rfq.getRequest().getArchitecture());
@@ -286,7 +285,7 @@ public class Request {
         	r.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
     	}
     	
-    	Cores co = new DefaultCores();
+    	Cores co = new Cores();
     	
     	String duration;
     	
@@ -303,7 +302,7 @@ public class Request {
     	co.setTOTALCORES(getCPUCount());
     	co.setRESOURCE(r);
     	
-    	Cost c = new DefaultCost();
+    	Cost c = new Cost();
     	c.setCORES(co);
     	c.setCPUHOURCOST(Integer.toString(getCPUCost()));
     	c.setDEADLINE(getEnd().toString());
@@ -315,7 +314,7 @@ public class Request {
     
 	public RFQ getRFQObject() {
 		
-		RFQ rfq2 = new DefaultRFQ();
+		RFQ rfq2 = new RFQ();
 		
 		rfq2.setCOST(getCostObject());
 		rfq2.setREQUESTID(requestID);

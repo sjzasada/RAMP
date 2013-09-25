@@ -1,6 +1,6 @@
 package uk.ac.ucl.chem.ccs.ramp.user;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 import jade.core.AID;
 
 public class ReceivedOffer {

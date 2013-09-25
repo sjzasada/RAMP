@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class OfferList<E> extends Vector {
 

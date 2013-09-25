@@ -21,13 +21,10 @@ import javax.swing.SwingUtilities;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
-
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeRequest;
-
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeRequest;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MarketOntology;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 
 import jade.content.ContentManager;
@@ -73,6 +70,7 @@ public class UserAgent extends Agent {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(onto);
 
+		System.err.println("Main ontology in use is " + getContentManager().getOntologyNames()[0]);
 		//register the content language 
 
 		//check for resource agents periodically
@@ -334,7 +332,7 @@ public class UserAgent extends Agent {
 				cfp.setReplyWith("cfp"+requestID);
 				//TODO: Should set reply by too
 
-				MakeRequest req = new DefaultMakeRequest();
+				MakeRequest req = new MakeRequest();
 
 
 				//TODO: Check for existing offers. If we have a better one, make that the new bidding target. 
@@ -354,6 +352,10 @@ public class UserAgent extends Agent {
 
 				//add onto object to message 
 				try {
+					
+					System.err.println("Using ontology " + myAgent.getContentManager().getOntologyNames()[0]);
+					System.err.println("CFP with ontology " + cfp.getOntology());
+
 					myAgent.getContentManager().fillContent(cfp, req);
 				} catch (Exception e) {
 					e.printStackTrace();
