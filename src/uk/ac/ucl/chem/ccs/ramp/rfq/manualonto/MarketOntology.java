@@ -61,7 +61,7 @@ public class MarketOntology extends jade.content.onto.Ontology  {
    * Constructor
   */
   private MarketOntology(){ 
-    super(ONTOLOGY_NAME, BasicOntology.getInstance());
+    super(ONTOLOGY_NAME, BasicOntology.getInstance(), new jade.content.onto.BCReflectiveIntrospector());
     try { 
 
     // adding Concept(s)

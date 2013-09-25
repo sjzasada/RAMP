@@ -19,14 +19,12 @@ import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer.Status;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeOffer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MakeRequest;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.MarketOntology;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.RFQ;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultMakeOffer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeRequest;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MarketOntology;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 
 import jade.content.ContentManager;
 import jade.content.lang.Codec;
@@ -132,7 +130,7 @@ public class ResourceAgent extends Agent {
 					
 					boolean anyOffers = false;
 					
-					MakeOffer offers = new DefaultMakeOffer();
+					MakeOffer offers = new MakeOffer();
 					
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();

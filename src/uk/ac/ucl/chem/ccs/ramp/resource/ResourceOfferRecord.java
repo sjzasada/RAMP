@@ -1,8 +1,7 @@
 package uk.ac.ucl.chem.ccs.ramp.resource;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.impl.DefaultOffer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class ResourceOfferRecord {
 
@@ -55,7 +54,7 @@ public class ResourceOfferRecord {
 		
 		calledTimes++;
 		
-		Offer of = new DefaultOffer();
+		Offer of = new Offer();
 		
 		of.setOFFERID(offerID);
 		of.setREQUESTID(requestID);

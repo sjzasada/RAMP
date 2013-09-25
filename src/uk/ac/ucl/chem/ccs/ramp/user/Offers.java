@@ -12,7 +12,7 @@ package uk.ac.ucl.chem.ccs.ramp.user;
 import java.util.HashMap;
 import java.util.Set;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 import jade.core.AID;
 
 public class Offers {

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
-import uk.ac.ucl.chem.ccs.ramp.rfq.onto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
 
 public class QstatInterface implements ResourceInterface {
 
