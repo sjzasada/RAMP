@@ -22,23 +22,35 @@ public class MarketOntology extends jade.content.onto.Ontology  {
 
 
    // VOCABULARY
-    public static final String CORES_RESOURCE="RESOURCE";
-    public static final String CORES_TOTALCORES="TOTALCORES";
-    public static final String CORES_NODECORES="NODECORES";
-    public static final String CORES_DURATION="DURATION";
-    public static final String CORES_NODECOUNT="NODECOUNT";
-    public static final String CORES="Cores";
-    public static final String COST_CORES="CORES";
-    public static final String COST_CPUHOURCOST="CPUHOURCOST";
-    public static final String COST_NOTBEFORE="NOTBEFORE";
-    public static final String COST_DEADLINE="DEADLINE";
-    public static final String COST="Cost";
+  public static final String RFQ="rfq";
+  public static final String RFQ_CPUHOURCOST="CPUHOURCOST";
+  public static final String RFQ_NOTBEFORE="NOTBEFORE";
+  public static final String RFQ_DEADLINE="DEADLINE";
+  public static final String RFQ_OPERATINGSYSTEM="OPERATINGSYSTEM";
+  public static final String RFQ_OSVERSION="OSVERSION";
+  public static final String RFQ_ARCHITECTURE="ARCHITECTURE";
+  public static final String RFQ_CPUSPEED="CPUSPEED";
+  public static final String RFQ_DURATION="DURATION";
+  public static final String RFQ_INTERNODEBANDWIDTH="INTERNODEBANDWIDTH";
+  public static final String RFQ_RAMPERCORE="RAMPERCORE";
+  public static final String RFQ_NODEDISKSPACE="NODEDISKSPACE";
+  public static final String RFQ_TOTALDISKSPACE="TOTALDISKSPACE";
+  public static final String RFQ_TOTALCORES="TOTALCORES";
+  public static final String RFQ_NODECORES="NODECORES";
+  public static final String RFQ_NODECOUNT="NODECOUNT";
+  public static final String RFQ_REQUESTID="REQUESTID";
+
+ 
+    
+    
+    
     public static final String OFFER_OFFERID="OFFERID";
-    public static final String OFFER_OFFERCOST="OFFERCOST";
+    public static final String OFFER_OFFERRFQ="OFFERRFQ";
     public static final String OFFER="Offer";
-    public static final String RFQ_REQUESTID="REQUESTID";
-    public static final String RFQ_COST="COST";
-    public static final String RFQ="RFQ";
+
+
+    
+    
     //public static final String CANCEL_CANCELINSTANCE="CANCELINSTANCE";
     //public static final String CANCEL="Cancel";
     public static final String MAKEOFFER_OFFERINSTANCE="OFFERINSTANCE";
@@ -47,26 +59,20 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     public static final String MAKEREQUEST="MakeRequest";
     //public static final String RESCHEDULE_RSCHEDINSTANCE="RSCHEDINSTANCE";
     //public static final String RESCHEDULE="Reschedule";
-    public static final String RESOURCE_NODEDISKSPACE="NODEDISKSPACE";
-    public static final String RESOURCE_OSVERSION="OSVERSION";
-    public static final String RESOURCE_ARCHITECTURE="ARCHITECTURE";
-    public static final String RESOURCE_OPERATINGSYSTEM="OPERATINGSYSTEM";
-    public static final String RESOURCE_CPUSPEED="CPUSPEED";
-    public static final String RESOURCE_INTERNODEBANDWIDTH="INTERNODEBANDWIDTH";
-    public static final String RESOURCE_RAMPERCORE="RAMPERCORE";
-    public static final String RESOURCE_TOTALDISKSPACE="TOTALDISKSPACE";
-    public static final String RESOURCE="Resource";
+
 
   /**
    * Constructor
   */
   private MarketOntology(){ 
-    super(ONTOLOGY_NAME, BasicOntology.getInstance(), new jade.content.onto.BCReflectiveIntrospector());
+    super(ONTOLOGY_NAME, BasicOntology.getInstance());
     try { 
 
     // adding Concept(s)
-    ConceptSchema resourceSchema = new ConceptSchema(RESOURCE);
-    add(resourceSchema, Resource.class);
+    ConceptSchema rfqSchema = new ConceptSchema(RFQ);
+    add(rfqSchema, RFQ.class);
+    ConceptSchema offerSchema = new ConceptSchema(OFFER);
+    add(offerSchema, Offer.class);
 
     // adding AgentAction(s)
     //AgentActionSchema rescheduleSchema = new AgentActionSchema(RESCHEDULE);
@@ -81,60 +87,45 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     // adding AID(s)
 
     // adding Predicate(s)
-    PredicateSchema rfqSchema = new PredicateSchema(RFQ);
-    add(rfqSchema, RFQ.class);
-    PredicateSchema offerSchema = new PredicateSchema(OFFER);
-    add(offerSchema, Offer.class);
-    PredicateSchema costSchema = new PredicateSchema(COST);
-    add(costSchema, Cost.class);
-    PredicateSchema coresSchema = new PredicateSchema(CORES);
-    add(coresSchema, Cores.class);
+//    PredicateSchema rfqSchema = new PredicateSchema(RFQ);
+//    add(rfqSchema, RFQ.class);
+//    PredicateSchema offerSchema = new PredicateSchema(OFFER);
+//    add(offerSchema, Offer.class);
+//    PredicateSchema costSchema = new PredicateSchema(COST);
+//    add(costSchema, Cost.class);
+//    PredicateSchema coresSchema = new PredicateSchema(CORES);
+//    add(coresSchema, Cores.class);
 
 
+
+    
+    
     // adding fields
-    resourceSchema.add(RESOURCE_TOTALDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_RAMPERCORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_INTERNODEBANDWIDTH, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_CPUSPEED, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_OPERATINGSYSTEM, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_ARCHITECTURE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_OSVERSION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    resourceSchema.add(RESOURCE_NODEDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    //rescheduleSchema.add(RESCHEDULE_RSCHEDINSTANCE, rfqSchema);
-    makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, rfqSchema);
-    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, offerSchema);
-    //cancelSchema.add(CANCEL_CANCELINSTANCE, rfqSchema);
-   // rfqSchema.add(RFQ_COST, costSchema, ObjectSchema.MANDATORY);
-   // rfqSchema.add(RFQ_REQUESTID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-    rfqSchema.add(RFQ_COST, costSchema, ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_TOTALDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_RAMPERCORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_INTERNODEBANDWIDTH, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_CPUSPEED, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_OPERATINGSYSTEM, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_ARCHITECTURE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_OSVERSION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODEDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_DEADLINE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NOTBEFORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_CPUHOURCOST, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODECOUNT, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_DURATION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODECORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_TOTALCORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_REQUESTID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    
-    
-    
-//    offerSchema.add(OFFER_OFFERCOST, costSchema, ObjectSchema.MANDATORY);
-//    offerSchema.add(OFFER_OFFERID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-//    costSchema.add(COST_DEADLINE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-//    costSchema.add(COST_NOTBEFORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-//    costSchema.add(COST_CPUHOURCOST, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-//    costSchema.add(COST_CORES, coresSchema, ObjectSchema.MANDATORY);
-    
-    offerSchema.add(OFFER_OFFERCOST, costSchema, ObjectSchema.OPTIONAL);
-    offerSchema.add(OFFER_OFFERID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    costSchema.add(COST_DEADLINE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    costSchema.add(COST_NOTBEFORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    costSchema.add(COST_CPUHOURCOST, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    costSchema.add(COST_CORES, coresSchema, ObjectSchema.OPTIONAL);
-    
-    coresSchema.add(CORES_NODECOUNT, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
-//    coresSchema.add(CORES_DURATION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-    coresSchema.add(CORES_DURATION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
 
-    coresSchema.add(CORES_NODECORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
-    coresSchema.add(CORES_TOTALCORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, rfqSchema, 1, ObjectSchema.UNLIMITED);//any number of RFQs can be requested
+    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, offerSchema); //just one offer can be made
+
     
     
-//    coresSchema.add(CORES_RESOURCE, resourceSchema, ObjectSchema.MANDATORY);
-    coresSchema.add(CORES_RESOURCE, resourceSchema, ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OFFERRFQ, rfqSchema, ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OFFERID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+
 
     // adding name mappings
 
