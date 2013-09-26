@@ -6,7 +6,7 @@ package uk.ac.ucl.chem.ccs.ramp.resourceiface;
 import java.util.Random;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 
 /**
  * @author stef
@@ -21,7 +21,7 @@ public class TestInterface implements ResourceInterface {
 	 * @see uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface#canSatisfy(uk.ac.ucl.chem.ccs.ramp.rfq.Request)
 	 */
 	
-	public ResourceOfferRecord canSatisfy(Cost c) {
+	public ResourceOfferRecord canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
 		
 		ResourceOfferRecord ror = new ResourceOfferRecord(minCPUCost, c);
@@ -37,7 +37,7 @@ public class TestInterface implements ResourceInterface {
 	}
 
 
-	public String makeReservation(Cost c) {
+	public String makeReservation(RFQ c) {
 		// TODO Auto-generated method stub
 		return "123456";
 	}

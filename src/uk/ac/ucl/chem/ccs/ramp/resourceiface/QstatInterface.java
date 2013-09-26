@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 
 public class QstatInterface implements ResourceInterface {
 
@@ -30,12 +30,12 @@ public class QstatInterface implements ResourceInterface {
 	
 	private HashMap<Long, Integer> model = new HashMap<Long, Integer>();
 	
-	public ResourceOfferRecord canSatisfy(Cost c) {
+	public ResourceOfferRecord canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String makeReservation(Cost c) {
+	public String makeReservation(RFQ c) {
 		// TODO Auto-generated method stub
 		return null;
 	}

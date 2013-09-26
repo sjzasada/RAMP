@@ -19,7 +19,6 @@ import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer.Status;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeOffer;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeRequest;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MarketOntology;
@@ -135,7 +134,7 @@ public class ResourceAgent extends Agent {
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();
 						 
-						 ResourceOfferRecord ror = resInter.canSatisfy(rfq.getCOST());//check we can satisfy the offer
+						 ResourceOfferRecord ror = resInter.canSatisfy(rfq);//check we can satisfy the offer
 						 
 						 					 
 						 if (ror != null) {
@@ -208,7 +207,7 @@ public class ResourceAgent extends Agent {
 					
 					FirmOffer fo = currentOffers.get(offerID);
 					
-					String reservationID = resInter.makeReservation(fo.getRor().getOffer().getOFFERCOST());
+					String reservationID = resInter.makeReservation(fo.getRor().getOffer().getOFFERRFQ());
 					
 					
 					if (reservationID != null) {

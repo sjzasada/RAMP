@@ -18,7 +18,7 @@ public class RFQ implements jade.content.Concept {
 	    return _internalInstanceName;
 	  }
 
-	  private String PUHOURCOST;
+	  private String CPUHOURCOST;
 	  private String NOTBEFORE;
 	  private String DEADLINE;
 	  private String OPERATINGSYSTEM;
@@ -35,12 +35,12 @@ public class RFQ implements jade.content.Concept {
 	  private int NODECOUNT;
 	  private String REQUESTID;
 
-	public String getPUHOURCOST() {
-		return PUHOURCOST;
+	public String getCPUHOURCOST() {
+		return CPUHOURCOST;
 	}
 
-	public void setPUHOURCOST(String pUHOURCOST) {
-		PUHOURCOST = pUHOURCOST;
+	public void setCPUHOURCOST(String cPUHOURCOST) {
+		CPUHOURCOST = cPUHOURCOST;
 	}
 
 	public String getNOTBEFORE() {

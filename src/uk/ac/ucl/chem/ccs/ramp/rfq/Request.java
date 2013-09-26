@@ -249,44 +249,43 @@ public class Request {
     }
 	
 
-    public Cost getCostObject() {
+	public RFQ getRFQObject() {
     	
-    	Resource r = new Resource();
+		RFQ rfq2 = new RFQ();
     	
     	if (rfq.getRequest().getArchitecture() != null) {
-    		r.setARCHITECTURE(rfq.getRequest().getArchitecture());
+    		rfq2.setARCHITECTURE(rfq.getRequest().getArchitecture());
     	}
     	
     	if (rfq.getRequest().getCPUSpeed() != null) {
-        	r.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString()); //need to change this to check for nulls in the doc
+        	rfq2.setCPUSPEED(rfq.getRequest().getCPUSpeed().toString()); //need to change this to check for nulls in the doc
     	}
     	
     	if (rfq.getRequest().getInterNodeBandwidth() != null) {
-        	r.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
+        	rfq2.setINTERNODEBANDWIDTH(rfq.getRequest().getInterNodeBandwidth().toString());
     	}
 
     	if (rfq.getRequest().getDisk() != null) {
-        	r.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
+        	rfq2.setNODEDISKSPACE(rfq.getRequest().getDisk().toString());
     	}
     	
     	if (rfq.getRequest().getOperatingSystem() != null) {
-        	r.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());
+        	rfq2.setOPERATINGSYSTEM(rfq.getRequest().getOperatingSystem());
     	}
     	
     	if (rfq.getRequest().getOSVersion() != null) {
-        	r.setOSVERSION(rfq.getRequest().getOSVersion());
+        	rfq2.setOSVERSION(rfq.getRequest().getOSVersion());
     	}
     	
     	if (rfq.getRequest().getRAMPerCore() != null) {
-        	r.setRAMPERCORE(rfq.getRequest().getRAMPerCore().toString());
+        	rfq2.setRAMPERCORE(rfq.getRequest().getRAMPerCore().toString());
     	}	
     	
     	if (rfq.getRequest().getDisk() != null) {
-        	r.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
+        	rfq2.setTOTALDISKSPACE(rfq.getRequest().getDisk().toString());
     	}
     	
-    	Cores co = new Cores();
-    	
+  	
     	String duration;
     	
     	if (rfq.getRequest().getWallTime()==null) {
@@ -296,34 +295,23 @@ public class Request {
     	}
     	
     	
-    	co.setDURATION(duration);
-    	co.setNODECORES(0);
-    	co.setNODECOUNT(0);
-    	co.setTOTALCORES(getCPUCount());
-    	co.setRESOURCE(r);
+    	rfq2.setDURATION(duration);
+    	rfq2.setNODECORES(0);
+    	rfq2.setNODECOUNT(0);
+    	rfq2.setTOTALCORES(getCPUCount());
+    	    	
+    	rfq2.setCPUHOURCOST(Integer.toString(getCPUCost()));
+    	rfq2.setDEADLINE(getEnd().toString());
+    	rfq2.setNOTBEFORE(getStart().toString());
     	
-    	Cost c = new Cost();
-    	c.setCORES(co);
-    	c.setCPUHOURCOST(Integer.toString(getCPUCost()));
-    	c.setDEADLINE(getEnd().toString());
-    	c.setNOTBEFORE(getStart().toString());
+		rfq2.setREQUESTID(requestID);
+
     	
-    	
-    	return c;
+    	return rfq2;
     }
     
-	public RFQ getRFQObject() {
 		
-		RFQ rfq2 = new RFQ();
-		
-		rfq2.setCOST(getCostObject());
-		rfq2.setREQUESTID(requestID);
-		
-		
-		return rfq2;
-		
-	}
-    
+
     
 	/**
 	 * @param args

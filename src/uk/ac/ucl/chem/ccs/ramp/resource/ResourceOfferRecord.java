@@ -1,6 +1,6 @@
 package uk.ac.ucl.chem.ccs.ramp.resource;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class ResourceOfferRecord {
@@ -10,17 +10,17 @@ public class ResourceOfferRecord {
 	private int decrement;
 	private String requestID;
 	private int minCPUCost;
-	private Cost returnedCost;
+	private RFQ returnedRFQ;
 	private String offerID;
 	
 	
 	
 	
 	
-	public ResourceOfferRecord(int minCPUCost, Cost returnedCost) {
+	public ResourceOfferRecord(int minCPUCost, RFQ returnedRFQ) {
 		super();
 		this.minCPUCost = minCPUCost;
-		this.returnedCost = returnedCost;
+		this.returnedRFQ = returnedRFQ;
 	}
 	public int getDecrement() {
 		return decrement;
@@ -46,8 +46,8 @@ public class ResourceOfferRecord {
 	public void setOfferID(String offerID) {
 		this.offerID = offerID;
 	}
-	public void setCost(Cost returnedCost) {
-		this.returnedCost = returnedCost;
+	public void setRFQ(RFQ returnedRFQ) {
+		this.returnedRFQ = returnedRFQ;
 	}
 	
 	public Offer getOffer() {
@@ -57,16 +57,14 @@ public class ResourceOfferRecord {
 		Offer of = new Offer();
 		
 		of.setOFFERID(offerID);
-		of.setREQUESTID(requestID);
-		
+		of.setOFFERRFQ(returnedRFQ);
 		//naive cost model - most we can charge is 2x min cost
 		
 		int factor = minCPUCost/calledTimes;
 		// probably rounds to nearest int?
 		
-		returnedCost.setCPUHOURCOST(Integer.toString(minCPUCost+factor));
 		
-		of.setOFFERCOST(returnedCost);
+		of.getOFFERRFQ().setCPUHOURCOST(Integer.toString(minCPUCost+factor));
 		
 		return of;
 	}

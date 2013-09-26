@@ -12,7 +12,6 @@ package uk.ac.ucl.chem.ccs.ramp.user;
 import java.util.Date;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class RequestEvaluator {
@@ -27,10 +26,10 @@ public class RequestEvaluator {
 		Date start = b.getStart();
 		
 		//offer things to test
-		int offerCost = Integer.parseInt(myOffer.getOFFERCOST().getCPUHOURCOST());
-		int offerCPU = myOffer.getOFFERCOST().getCORES().getTOTALCORES();
-		Date offerStart = new Date(myOffer.getOFFERCOST().getNOTBEFORE());
-		Date offerEnd = new Date(myOffer.getOFFERCOST().getDEADLINE());
+		int offerCost = Integer.parseInt(myOffer.getOFFERRFQ().getCPUHOURCOST());
+		int offerCPU = myOffer.getOFFERRFQ().getTOTALCORES();
+		Date offerStart = new Date(myOffer.getOFFERRFQ().getNOTBEFORE());
+		Date offerEnd = new Date(myOffer.getOFFERRFQ().getDEADLINE());
 		
 		if (cost > offerCost) {
 			meetsReq=false;
@@ -48,12 +47,10 @@ public class RequestEvaluator {
 	
 	public static boolean naiveEvaluator (uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer offer, uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer offer2) {
 		
-		Cost costa = offer.getOFFERCOST();
-		Cost costb = offer2.getOFFERCOST();
-		
+	
 		//just check that the cost of b is less than the cost of a
-		int cpucosta = Integer.parseInt(costa.getCPUHOURCOST());
-		int cpucostb = Integer.parseInt(costb.getCPUHOURCOST());
+		int cpucosta = Integer.parseInt(offer.getOFFERRFQ().getCPUHOURCOST());
+		int cpucostb = Integer.parseInt(offer2.getOFFERRFQ().getCPUHOURCOST());
 		
 		if (cpucosta > cpucostb) {
 			return true;

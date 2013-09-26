@@ -413,7 +413,7 @@ public class UserAgent extends Agent {
 						// process the offers received 
 						while (itr.hasNext()) {
 							Offer myOffer=itr.next();
-							String currentRequestID = myOffer.getREQUESTID();//use request ID set by offer
+							String currentRequestID = myOffer.getOFFERRFQ().getREQUESTID();//use request ID set by offer
 							displayMessage("Recieved offer " + myOffer.getOFFERID() + " from " + responder);
 
 							//check offer meets request
@@ -591,7 +591,7 @@ public class UserAgent extends Agent {
 					order.setConversationId("agree"+subID);
 					myAgent.send(order);
 
-					displayMessage(bestOffer.getOffer().getOFFERCOST().getCPUHOURCOST());
+					displayMessage(bestOffer.getOffer().getOFFERRFQ().getCPUHOURCOST());
 					displayMessage(order.getReplyWith());
 
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("agree"+subID), MessageTemplate.MatchInReplyTo("order"+subID));

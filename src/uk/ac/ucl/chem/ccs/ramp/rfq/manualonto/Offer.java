@@ -1,8 +1,5 @@
 package uk.ac.ucl.chem.ccs.ramp.rfq.manualonto;
 
-import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Cost;
-
-
 
 /**
 * Protege name: Offer
@@ -27,39 +24,25 @@ public class Offer implements jade.content.Predicate {
 	    return _internalInstanceName;
 	  }
 
-	   /**
-	   * Protege name: OFFERCOST
-	   */
-	   private Cost offercosT;
-	   public void setOFFERCOST(Cost value) { 
-	    this.offercosT=value;
-	   }
-	   public Cost getOFFERCOST() {
-	     return this.offercosT;
-	   }
+	    private String OFFERID;
+	    private RFQ OFFERRFQ;
 
-	   /**
-	   * Protege name: OFFERID
-	   */
-	   private String offeriD;
-	   public void setOFFERID(String value) { 
-	    this.offeriD=value;
-	   }
-	   public String getOFFERID() {
-	     return this.offeriD;
-	   }
+		public String getOFFERID() {
+			return OFFERID;
+		}
 
+		public void setOFFERID(String oFFERID) {
+			OFFERID = oFFERID;
+		}
 
-	private String requestiD;
-	public String getREQUESTID() {
-		// TODO Auto-generated method stub
-		return this.requestiD;
-	}
+		public RFQ getOFFERRFQ() {
+			return OFFERRFQ;
+		}
 
-
-	public void setREQUESTID(String value) {
-		// TODO Auto-generated method stub
-		this.requestiD = value;
-	}
+		public void setOFFERRFQ(RFQ oFFERRFQ) {
+			OFFERRFQ = oFFERRFQ;
+		}
+	    
+	    
 
 }
