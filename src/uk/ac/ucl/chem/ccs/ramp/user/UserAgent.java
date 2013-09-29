@@ -75,6 +75,10 @@ public class UserAgent extends Agent {
 
 		//check for resource agents periodically
 		addBehaviour(new TickerBehaviour(this, 60000) {
+			public void onStart () {
+				//onTick();
+			}
+			
 			protected void onTick () {
 				DFAgentDescription template = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
@@ -86,6 +90,7 @@ public class UserAgent extends Agent {
 					resourceAgents.clear();
 					for (int i=0; i<result.length; ++i) {
 						resourceAgents.addElement(result[i].getName()); //add the agents found to the vector 
+						System.err.println("Found resource agent " + result[i].getName());
 					}
 				} catch (FIPAException fp) {
 					fp.printStackTrace();
@@ -301,6 +306,10 @@ public class UserAgent extends Agent {
 			this.requestID=requestID;
 		}
 
+		public void onStart() {
+			//do nothing
+		}
+		
 		public void onTick () {
 			long currentTime = System.currentTimeMillis();
 
@@ -355,6 +364,7 @@ public class UserAgent extends Agent {
 					
 					System.err.println("Using ontology " + myAgent.getContentManager().getOntologyNames()[0]);
 					System.err.println("CFP with ontology " + cfp.getOntology());
+					
 
 					myAgent.getContentManager().fillContent(cfp, req);
 				} catch (Exception e) {

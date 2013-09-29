@@ -112,9 +112,12 @@ public class ResourceAgent extends Agent {
 		public void action () {
 			
 			ACLMessage msg = myAgent.receive(mt);
-			
+
 			if (msg != null) {
-				
+				System.err.println("Received request");
+				System.err.println("Agent using ontolgoy " + myAgent.getContentManager().getOntologyNames()[0]);
+				System.err.println("Message using ontology " + msg.getOntology());
+				System.err.println("Message is "+ msg.toString());
 				
 				ACLMessage reply = msg.createReply();
 				
@@ -124,7 +127,10 @@ public class ResourceAgent extends Agent {
 				try {
 					ContentManager cm = myAgent.getContentManager();
 					Action act = (Action) cm.extractContent(msg);
+					System.err.println("Action "+ act.toString());
 					MakeRequest req = (MakeRequest)act.getAction();
+					
+					
 					Iterator<RFQ> it = req.getAllRFQINSTANCE();
 					
 					boolean anyOffers = false;
@@ -136,8 +142,11 @@ public class ResourceAgent extends Agent {
 						 
 						 ResourceOfferRecord ror = resInter.canSatisfy(rfq);//check we can satisfy the offer
 						 
-						 					 
+						 System.err.println("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
+						 
 						 if (ror != null) {
+							 System.err.println("Making offer");
+							 
 							 //TODO: need to check here if we've offered before and cancel offers if resource now cannot satisfy 
 								Random generator = new Random();
 								int id = generator.nextInt();
@@ -157,6 +166,8 @@ public class ResourceAgent extends Agent {
 							 					 	
 							 	offers.addOFFERINSTANCE(myOffer);
 							 	
+							} else {
+								 System.err.println("Not making offer");
 							}
 						 
 						 //RFQ offer = 
@@ -177,8 +188,12 @@ public class ResourceAgent extends Agent {
 				
 			} catch (OntologyException oe) {
 				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+				System.err.println("Message not understood - ontology");
+				oe.printStackTrace();
 			} catch (CodecException ce) {
 				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+				System.err.println("Message not understood - codec");
+				ce.printStackTrace();
 			}
 				
 				myAgent.send(reply);

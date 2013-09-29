@@ -13,7 +13,7 @@ public class MarketOntology extends jade.content.onto.Ontology  {
   //private static final long serialVersionUID = -1439939741134496089L;
 
   //NAME
-  public static final String ONTOLOGY_NAME = "Market";
+  public static final String ONTOLOGY_NAME = "ComputeMarket";
   // The singleton instance of this ontology
   private static Ontology theInstance = new MarketOntology();
   public static Ontology getInstance() {
