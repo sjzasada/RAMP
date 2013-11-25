@@ -125,11 +125,11 @@ public class ResourceAgent extends Agent {
 				
 				
 				try {
-					ContentManager cm = myAgent.getContentManager();
-					Action act = (Action) cm.extractContent(msg);
-					System.err.println("Action "+ act.toString());
-					MakeRequest req = (MakeRequest)act.getAction();
-					
+				//	ContentManager cm = myAgent.getContentManager();
+				//	Action act = (Action) cm.extractContent(msg);
+					MakeRequest req = (MakeRequest)myAgent.getContentManager().extractContent(msg);
+					System.err.println("Action "+ req.toString());
+
 					
 					Iterator<RFQ> it = req.getAllRFQINSTANCE();
 					

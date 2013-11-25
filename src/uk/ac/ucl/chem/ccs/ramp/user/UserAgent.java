@@ -412,10 +412,15 @@ public class UserAgent extends Agent {
 
 
 					try {
-						ContentManager cm = myAgent.getContentManager();
-						Action act = (Action) cm.extractContent(reply);
-						MakeOffer off = (MakeOffer)act.getAction();
+						//ContentManager cm = myAgent.getContentManager();
+						//Action act = (Action) cm.extractContent(reply);
+						//MakeOffer off = (MakeOffer)act.getAction();
 
+						MakeOffer off = (MakeOffer)myAgent.getContentManager().extractContent(reply);
+
+						
+						System.err.println("Got offer");
+						
 						//throws exception if we don't understand message
 
 						Iterator<Offer> itr = off.getAllOFFERINSTANCE();

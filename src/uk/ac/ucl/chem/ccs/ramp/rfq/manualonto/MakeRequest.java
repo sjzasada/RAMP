@@ -9,8 +9,8 @@ import jade.util.leap.*;
 * @author OntologyBeanGenerator v4.1
 * @version 2011/06/11, 21:40:02
 */
-//public class MakeRequest implements jade.content.AgentAction {
-	public class MakeRequest implements jade.content.Predicate {
+public class MakeRequest implements jade.content.Predicate {
+//	public class MakeRequest implements jade.content.Concept {
 
 	  private static final long serialVersionUID = -1439939741134496089L;
 

@@ -6,7 +6,7 @@ package uk.ac.ucl.chem.ccs.ramp.rfq.manualonto;
 * @author OntologyBeanGenerator v4.1
 * @version 2011/06/11, 21:40:02
 */
-public class Offer implements jade.content.Predicate {
+public class Offer implements jade.content.Concept {
 
 	 private static final long serialVersionUID = -1439939741134496089L;
 

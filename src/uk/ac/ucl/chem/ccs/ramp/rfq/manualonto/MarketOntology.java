@@ -71,13 +71,14 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     // adding Concept(s)
     add(new ConceptSchema(RFQ), RFQ.class);
     add(new ConceptSchema(OFFER), Offer.class);
-    add(new AgentActionSchema(MAKEREQUEST), MakeRequest.class);
-    add(new AgentActionSchema(MAKEOFFER), MakeOffer.class);
-
+//    add(new AgentActionSchema(MAKEREQUEST), MakeRequest.class);
+//    add(new AgentActionSchema(MAKEOFFER), MakeOffer.class);
+    add(new PredicateSchema(MAKEREQUEST), MakeRequest.class);
+    add(new PredicateSchema(MAKEOFFER), MakeOffer.class);
     
     ConceptSchema rfqSchema = (ConceptSchema)getSchema(RFQ);
     // adding fields
-    rfqSchema.add(RFQ_TOTALDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+/*    rfqSchema.add(RFQ_TOTALDISKSPACE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_RAMPERCORE, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_INTERNODEBANDWIDTH, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_CPUSPEED, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
@@ -92,19 +93,41 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     rfqSchema.add(RFQ_DURATION, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_NODECORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
     rfqSchema.add(RFQ_TOTALCORES, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
-    rfqSchema.add(RFQ_REQUESTID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_REQUESTID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);*/
 
+    rfqSchema.add(RFQ_TOTALDISKSPACE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_RAMPERCORE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_INTERNODEBANDWIDTH, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_CPUSPEED, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_OPERATINGSYSTEM, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_ARCHITECTURE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_OSVERSION, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODEDISKSPACE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_DEADLINE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NOTBEFORE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_CPUHOURCOST, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODECOUNT, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_DURATION, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_NODECORES, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_TOTALCORES, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    rfqSchema.add(RFQ_REQUESTID, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    
+    
     ConceptSchema offerSchema = (ConceptSchema)getSchema(OFFER);
     offerSchema.add(OFFER_OFFERRFQ, (ConceptSchema)getSchema(RFQ), ObjectSchema.OPTIONAL);
-    offerSchema.add(OFFER_OFFERID, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OFFERID, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     
-    AgentActionSchema makeRequestSchema = (AgentActionSchema)getSchema(MAKEREQUEST);
+    PredicateSchema makeRequestSchema = (PredicateSchema)getSchema(MAKEREQUEST);
     makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, (ConceptSchema)getSchema(RFQ), 1, ObjectSchema.UNLIMITED);//any number of RFQs can be requested
 
-    AgentActionSchema makeOfferSchema = (AgentActionSchema)getSchema(MAKEOFFER);
+    PredicateSchema makeOfferSchema = (PredicateSchema)getSchema(MAKEOFFER);
     makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, (ConceptSchema)getSchema(OFFER)); //just one offer can be made
 
-    
+ //   ConceptSchema makeRequestSchema = (ConceptSchema)getSchema(MAKEREQUEST);
+ //   makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, (ConceptSchema)getSchema(RFQ), 1, ObjectSchema.UNLIMITED);//any number of RFQs can be requested
+
+//    ConceptSchema makeOfferSchema = (ConceptSchema)getSchema(MAKEOFFER);
+//    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, (ConceptSchema)getSchema(OFFER)); //just one offer can be made
     
 
 
