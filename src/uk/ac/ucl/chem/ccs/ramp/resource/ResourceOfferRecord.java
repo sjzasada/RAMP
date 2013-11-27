@@ -57,15 +57,72 @@ public class ResourceOfferRecord {
 		Offer of = new Offer();
 		
 		of.setOFFERID(offerID);
-		of.setOFFERRFQ(returnedRFQ);
 		//naive cost model - most we can charge is 2x min cost
 		
 		int factor = minCPUCost/calledTimes;
 		// probably rounds to nearest int?
 		
 		
-		of.getOFFERRFQ().setCPUHOURCOST(Integer.toString(minCPUCost+factor));
+		returnedRFQ.setCPUHOURCOST(Integer.toString(minCPUCost+factor));
 		
+		if (returnedRFQ.getARCHITECTURE() != null) {
+		of.setOARCHITECTURE(returnedRFQ.getARCHITECTURE());
+		}
+		
+		if (returnedRFQ.getCPUHOURCOST() != null) {
+		of.setOCPUHOURCOST(returnedRFQ.getCPUHOURCOST());
+		}
+		
+		if (returnedRFQ.getCPUSPEED() != null) {
+		of.setOCPUSPEED(returnedRFQ.getCPUSPEED());
+		}
+		
+		if (returnedRFQ.getDEADLINE() != null) {
+		of.setODEADLINE(returnedRFQ.getDEADLINE());
+		}
+		
+		if (returnedRFQ.getDURATION() != null) {
+		of.setODURATION(returnedRFQ.getDURATION());
+		}
+		
+		if (returnedRFQ.getINTERNODEBANDWIDTH() != null) {
+		of.setOINTERNODEBANDWIDTH(returnedRFQ.getINTERNODEBANDWIDTH());
+		}
+		
+		of.setONODECORES(returnedRFQ.getNODECORES());
+		
+		of.setONODECOUNT(returnedRFQ.getNODECOUNT());
+		
+		of.setOTOTALCORES(returnedRFQ.getTOTALCORES());
+		
+		if (returnedRFQ.getNODEDISKSPACE() != null) {
+		of.setONODEDISKSPACE(returnedRFQ.getNODEDISKSPACE());
+		}
+
+		if (returnedRFQ.getTOTALDISKSPACE() != null) {
+		of.setOTOTALDISKSPACE(returnedRFQ.getTOTALDISKSPACE());
+		}
+		
+		if (returnedRFQ.getNOTBEFORE() != null) {
+		of.setONOTBEFORE(returnedRFQ.getNOTBEFORE());
+		}
+		
+		if (returnedRFQ.getOPERATINGSYSTEM() != null) {
+		of.setOOPERATINGSYSTEM(returnedRFQ.getOPERATINGSYSTEM());
+		}
+		
+		if (returnedRFQ.getOSVERSION() != null) {
+		of.setOOSVERSION(returnedRFQ.getOSVERSION());
+		}
+		
+		if (returnedRFQ.getRAMPERCORE() != null) {
+		of.setORAMPERCORE(returnedRFQ.getRAMPERCORE());
+		}
+		
+		if (returnedRFQ.getREQUESTID() != null) {
+		of.setOREQUESTID(returnedRFQ.getREQUESTID());
+		}
+
 		return of;
 	}
 	

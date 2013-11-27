@@ -43,11 +43,24 @@ public class MarketOntology extends jade.content.onto.Ontology  {
  
     
     
-    
-    public static final String OFFER_OFFERID="OFFERID";
-    public static final String OFFER_OFFERRFQ="OFFERRFQ";
     public static final String OFFER="Offer";
-
+    public static final String OFFER_OFFERID="OFFERID";
+    public static final String OFFER_OCPUHOURCOST="OCPUHOURCOST";
+    public static final String OFFER_ONOTBEFORE="ONOTBEFORE";
+    public static final String OFFER_ODEADLINE="ODEADLINE";
+    public static final String OFFER_OOPERATINGSYSTEM="OOPERATINGSYSTEM";
+    public static final String OFFER_OOSVERSION="OOSVERSION";
+    public static final String OFFER_OARCHITECTURE="OARCHITECTURE";
+    public static final String OFFER_OCPUSPEED="OCPUSPEED";
+    public static final String OFFER_ODURATION="ODURATION";
+    public static final String OFFER_OINTERNODEBANDWIDTH="OINTERNODEBANDWIDTH";
+    public static final String OFFER_ORAMPERCORE="ORAMPERCORE";
+    public static final String OFFER_ONODEDISKSPACE="ONODEDISKSPACE";
+    public static final String OFFER_OTOTALDISKSPACE="OTOTALDISKSPACE";
+    public static final String OFFER_OTOTALCORES="OTOTALCORES";
+    public static final String OFFER_ONODECORES="ONODECORES";
+    public static final String OFFER_ONODECOUNT="ONODECOUNT";
+    public static final String OFFER_OREQUESTID="OREQUESTID";
 
     
     
@@ -70,7 +83,7 @@ public class MarketOntology extends jade.content.onto.Ontology  {
 
     // adding Concept(s)
     add(new ConceptSchema(RFQ), RFQ.class);
-    add(new ConceptSchema(OFFER), Offer.class);
+    add(new ConceptSchema(OFFER), uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer.class);
 //    add(new AgentActionSchema(MAKEREQUEST), MakeRequest.class);
 //    add(new AgentActionSchema(MAKEOFFER), MakeOffer.class);
     add(new PredicateSchema(MAKEREQUEST), MakeRequest.class);
@@ -114,14 +127,29 @@ public class MarketOntology extends jade.content.onto.Ontology  {
     
     
     ConceptSchema offerSchema = (ConceptSchema)getSchema(OFFER);
-    offerSchema.add(OFFER_OFFERRFQ, (ConceptSchema)getSchema(RFQ), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OTOTALDISKSPACE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ORAMPERCORE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OINTERNODEBANDWIDTH, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OCPUSPEED, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OOPERATINGSYSTEM, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OARCHITECTURE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OOSVERSION, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ONODEDISKSPACE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ODEADLINE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ONOTBEFORE, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OCPUHOURCOST, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ONODECOUNT, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ODURATION, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_ONODECORES, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OTOTALCORES, (PrimitiveSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+    offerSchema.add(OFFER_OREQUESTID, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     offerSchema.add(OFFER_OFFERID, (PrimitiveSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     
     PredicateSchema makeRequestSchema = (PredicateSchema)getSchema(MAKEREQUEST);
     makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, (ConceptSchema)getSchema(RFQ), 1, ObjectSchema.UNLIMITED);//any number of RFQs can be requested
 
     PredicateSchema makeOfferSchema = (PredicateSchema)getSchema(MAKEOFFER);
-    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, (ConceptSchema)getSchema(OFFER)); //just one offer can be made
+    makeOfferSchema.add(MAKEOFFER_OFFERINSTANCE, (ConceptSchema)getSchema(OFFER), 1, ObjectSchema.UNLIMITED); //just one offer can be made
 
  //   ConceptSchema makeRequestSchema = (ConceptSchema)getSchema(MAKEREQUEST);
  //   makeRequestSchema.add(MAKEREQUEST_RFQINSTANCE, (ConceptSchema)getSchema(RFQ), 1, ObjectSchema.UNLIMITED);//any number of RFQs can be requested

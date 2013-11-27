@@ -166,6 +166,9 @@ public class ResourceAgent extends Agent {
 							 					 	
 							 	offers.addOFFERINSTANCE(myOffer);
 							 	
+								 System.err.println("Offer " + myOffer.getOREQUESTID() + " for " + myOffer.getOTOTALCORES() + " cores " + " @ " + myOffer.getOCPUHOURCOST());
+
+							 	
 							} else {
 								 System.err.println("Not making offer");
 							}
@@ -222,7 +225,7 @@ public class ResourceAgent extends Agent {
 					
 					FirmOffer fo = currentOffers.get(offerID);
 					
-					String reservationID = resInter.makeReservation(fo.getRor().getOffer().getOFFERRFQ());
+					String reservationID = resInter.makeReservation(fo.getRor().getOffer());
 					
 					
 					if (reservationID != null) {

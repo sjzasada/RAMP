@@ -26,10 +26,10 @@ public class RequestEvaluator {
 		Date start = b.getStart();
 		
 		//offer things to test
-		int offerCost = Integer.parseInt(myOffer.getOFFERRFQ().getCPUHOURCOST());
-		int offerCPU = myOffer.getOFFERRFQ().getTOTALCORES();
-		Date offerStart = new Date(myOffer.getOFFERRFQ().getNOTBEFORE());
-		Date offerEnd = new Date(myOffer.getOFFERRFQ().getDEADLINE());
+		int offerCost = Integer.parseInt(myOffer.getOCPUHOURCOST());
+		int offerCPU = myOffer.getOTOTALCORES();
+		Date offerStart = new Date(myOffer.getONOTBEFORE());
+		Date offerEnd = new Date(myOffer.getODEADLINE());
 		
 		if (cost > offerCost) {
 			meetsReq=false;
@@ -49,8 +49,8 @@ public class RequestEvaluator {
 		
 	
 		//just check that the cost of b is less than the cost of a
-		int cpucosta = Integer.parseInt(offer.getOFFERRFQ().getCPUHOURCOST());
-		int cpucostb = Integer.parseInt(offer2.getOFFERRFQ().getCPUHOURCOST());
+		int cpucosta = Integer.parseInt(offer.getOCPUHOURCOST());
+		int cpucostb = Integer.parseInt(offer2.getOCPUHOURCOST());
 		
 		if (cpucosta > cpucostb) {
 			return true;

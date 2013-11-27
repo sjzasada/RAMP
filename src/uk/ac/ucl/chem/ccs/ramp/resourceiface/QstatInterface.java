@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class QstatInterface implements ResourceInterface {
 
@@ -35,7 +36,7 @@ public class QstatInterface implements ResourceInterface {
 		return null;
 	}
 
-	public String makeReservation(RFQ c) {
+	public String makeReservation(Offer c) {
 		// TODO Auto-generated method stub
 		return null;
 	}
