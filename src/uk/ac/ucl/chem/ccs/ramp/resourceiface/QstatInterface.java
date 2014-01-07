@@ -11,229 +11,149 @@ package uk.ac.ucl.chem.ccs.ramp.resourceiface;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
+import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public class QstatInterface implements ResourceInterface {
 
-	private String qstat="/home/stefan/.workspace/RAMP/data/queuedata/fake_qstat.pl";
-	private String qrstat="/home/stefan/.workspace/RAMP/data/queuedata/fake_qrstat.pl";
-	
-	
-	private int timeperiod=600;
-	private int maxcores = 163840;
-	
-	
-	private HashMap<Long, Integer> model = new HashMap<Long, Integer>();
+	private String qstat="/home/stef/workspace/RAMP/data/queuedata/fake_qstat2.pl";
+	private String qrstat="/home/stef/workspace/RAMP/data/queuedata/fake_qrstat2.pl";
 	
 	public ResourceOfferRecord canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
+		
+		int cpucount = c.getTOTALCORES();
+		String when = c.getNOTBEFORE();
+		
+		Date d = new Date();
+		long l = d.parse(when);
+		long n = System.currentTimeMillis();
+		
+		l=(l-n)/1000;
+				
+		int price = Integer.parseInt(System.getProperty("ramp.price")); 	
+		String confile=System.getProperty("ramp.conffile");
+		
+		System.out.println("Looking to buy " + cpucount + " in " + l + " seconds");
+		
+		float factor=0.0f; 
+		String result="";
+		
+	       try {
+	            Runtime rt = Runtime.getRuntime();
+	            Process pr = rt.exec(qstat + " " + l + " " + cpucount + " " + confile);
+
+	            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+	            String line=null;
+	            int cnt=0;
+	            while((line=input.readLine()) != null) {
+	            	//System.err.println("Line" + line);
+	            	if (cnt==0) {
+	            		factor=Float.parseFloat(line);
+	            	} else if (cnt==1) {
+	            		result=line;
+	            	}
+	            	cnt++;
+	            } 
+	            
+	       } catch (Exception e) {
+	    	   e.printStackTrace();
+	       }
+	
+	       int offerprice=Math.round(price*factor);
+	       
+	       System.out.println("resource: " + result + " @ cost " + offerprice);
+	       
+	       int requestprice = Integer.parseInt(c.getCPUHOURCOST());
+	       
+	       if (result.equals("Accept") && offerprice <= requestprice) {
+	    	   ResourceOfferRecord ror = new ResourceOfferRecord(offerprice, c);
+	    	   return ror;
+	       }
+	       
 		return null;
 	}
 
 	public String makeReservation(Offer c) {
-		// TODO Auto-generated method stub
+		
+		int cpucount = c.getOTOTALCORES();
+		String when = c.getONOTBEFORE();
+		
+		Date d = new Date();
+		long l = d.parse(when);
+		long n = System.currentTimeMillis();
+		
+		l=(l-n)/1000;
+				
+		String confile=System.getProperty("ramp.conffile");
+		
+		System.out.println("Looking to reserve " + cpucount + " in " + l + " seconds");
+		
+		String result="";
+		
+		  try {
+	            Runtime rt = Runtime.getRuntime();
+	            Process pr = rt.exec(qrstat + " " + l + " " + cpucount + " " + confile);
+
+	            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+	            String line=null;
+	            int cnt=0;
+	            while((line=input.readLine()) != null) {
+	            	//System.err.println("Line" + line);
+	            	if (cnt==0) {
+	            		result=line;
+	            	}
+	            	cnt++;
+	            } 
+	            
+	       } catch (Exception e) {
+	    	   e.printStackTrace();
+	       }
+		
+		  if (!result.equals("Fail")) {
+			  return result;
+		  }
+		
 		return null;
 	}
 	
-	
-	public void updateState() {
-		
-		Vector<JobObject> lines = new Vector<JobObject>();
-		
-        try {
-            Runtime rt = Runtime.getRuntime();
-            Process pr = rt.exec(qstat);
-
-            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-
-            String line=null;
-
-            int usedCors = 0;
-            
-            while((line=input.readLine()) != null) {
-            	
-            	String [] vals = line.split("\t");
-            	
-            	boolean running=false;
-            	
-            	//model assumes FIFO
-            	if (vals[4].equals("R")) {
-            		running=true;
-
-            	}
-        		lines.add(new JobObject(Integer.parseInt(vals[3]), Integer.parseInt(vals[2]), running));
-            	
-            	
-            }
-
-            
-            //int exitVal = pr.waitFor();
-            
-            long time = 0;//seconds
-            
-            //build model from data
-            while (!lines.isEmpty()) {
-            	
-            	int cores=0;
-            	
-            	int index=0;
-            	Enumeration<JobObject> e = lines.elements();
-            	 while (e.hasMoreElements()) {
-            		 JobObject jo = e.nextElement();
-            	
-            		 //need to check if job has finished at this timepoint
-            		 
-            		 if (jo.isRunning() && jo.getEnd() < time) {
-            			lines.remove(index); 
-            			 
-            			//TODO: what next? 
-            			
-            		 } 
-            		 
-            		 if (jo.isRunning()) {
-            			 cores=cores+jo.getCores();
-            		 }
-            		 
-            	 }
-            	 
-            	 
-            	 
-            	//add this timepoint to the model
-            	model.put(new Long(time), new Integer(cores));
-            	
-            	time = time + timeperiod;
-            	index++;
-            }
-            
-        } catch(Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
-
-        //now process vector data into bins;
-        
-        int timer=0;
-        
-        
-        
-		
-	}
-
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
+		System.setProperty("ramp.price", "10");
+		System.setProperty("ramp.conffile", "/tmp/dibble.timefile");
+
 		QstatInterface qi = new QstatInterface();
 		
-		qi.updateState();
+		Request myRequest = new Request();	
+		myRequest.load("/home/stef/workspace/RAMP/RFQs/rfq.xml");
+		
+		ResourceOfferRecord ro = qi.canSatisfy(myRequest.getRFQObject());
+
+	      System.out.println("cost " + ro.getMinCPUCost() + " offer " + ro.getOffer().getOCPUHOURCOST());
+
+		String resID = qi.makeReservation(ro.getOffer());
+		
+		System.err.println("Reservation " + resID);
+
 		
 	}
 	
 	
-//	private class LineData {
-//		
-//		private int procs;
-//		private int time;
-//		/**
-//		 * @return the procs
-//		 */
-//		public int getProcs() {
-//			return procs;
-//		}
-//		/**
-//		 * @param procs the procs to set
-//		 */
-//		public void setProcs(int procs) {
-//			this.procs = procs;
-//		}
-//		/**
-//		 * @return the time
-//		 */
-//		public int getTime() {
-//			return time;
-//		}
-//		/**
-//		 * @param time the time to set
-//		 */
-//		public void setTime(int time) {
-//			this.time = time;
-//		}
-//		/**
-//		 * @param procs
-//		 * @param time
-//		 */
-//		public LineData(int procs, int time) {
-//			this.procs = procs;
-//			this.time = time;
-//		}
-//		
-//		
-//		
-//	}
+
 	
-	private class JobObject {
-		
-		private int end;
-		private int cores;
-		private boolean running;
-		/**
-		 * @param end
-		 * @param cores
-		 * @param running
-		 */
-		public JobObject(int end, int cores, boolean running) {
-			this.end = end;
-			this.cores = cores;
-			this.running = running;
-		}
-		/**
-		 * @return the end
-		 */
-		public int getEnd() {
-			return end;
-		}
-		/**
-		 * @param end the end to set
-		 */
-		public void setEnd(int end) {
-			this.end = end;
-		}
-		/**
-		 * @return the cores
-		 */
-		public int getCores() {
-			return cores;
-		}
-		/**
-		 * @param cores the cores to set
-		 */
-		public void setCores(int cores) {
-			this.cores = cores;
-		}
-		/**
-		 * @return the running
-		 */
-		public boolean isRunning() {
-			return running;
-		}
-		/**
-		 * @param running the running to set
-		 */
-		public void setRunning(boolean running) {
-			this.running = running;
-		}
-		
-		
-		
-		
-	}
+	
 
 }

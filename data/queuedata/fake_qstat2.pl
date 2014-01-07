@@ -3,12 +3,13 @@
 
 use Sys::Hostname;
 
+($when, $jobsize, $timefile)=@ARGV;
+
 $myname=hostname;
 
-$timefile="/tmp/".$myname.".timefile";
-$logname="/home/stef/workspace/RAMP/data/queuedata/ANL-Intrepid-2009-1.swf";
 
 $now=time;
+
 
 if (-e $timefile) {
 
@@ -17,6 +18,9 @@ open FILE, "<$timefile" or die $!;
 my @lines = <FILE>;
 
 $start=$lines[0];
+$offset=$lines[1];
+$corecount=$lines[2];
+$logname=$lines[3];
 close FILE;
 
 } else {
@@ -26,12 +30,22 @@ close FILE;
 $start=$now;
 }
 
-$deltatime=$now-$start;
+if (!defined $offset || $offset=="") {
+    $offset=0;
+}
 
-print "Job id    \tName\tTSK\tReq Time\tS\n";
-print "----------\t----\t---\t--------\t-\n";
+$deltatime=$now-$start+$offset;
+
+#print "delta time is ".$deltatime."\n";
+
+#print "offset is ".$offset."\n";
+
+
+#read file
 
 open FILE2, "<$logname" or die $!;
+
+$totalcores=0;
 
 while (my $line = <FILE2>) {
 
@@ -54,31 +68,39 @@ while (my $line = <FILE2>) {
         next;
     }
 
+    $interestedin=$offset+$when;
 
-	#print "sub=".$sub." end=".$endtime." delta=".$deltatime."\n";
-
-
-	#not been submitted yet
 	if ($sub < $deltatime) {
-
-	#already finished
-	if ($endtime > $deltatime) {
-
-		if ($sub+$wait > $deltatime) {
-			$stat="Q";
-		} else {
-			$stat="R";
-		}	
-
-		print $myname.".".$job."\t".$u."\t".$p."\t".$treq."      \t".$stat."\n";
-	}
+	    if ($endtime > $deltatime) {
+		if ($sub > $interestedin) {
+#		    print $data."\n";
+		    $totalcores=$totalcores+$p;
+		}
+	    }
 	} else {
 		last;
 	}
 
 }
 
+
 }
 
+#print "Total cores allocated = ".$totalcores."\n";
+
+
+$percent=$totalcores/$corecount;
+
+if ($percent < 0.1) {
+    $percent=0.1;
+}
+
+print $percent."\n";
+
+if ($jobsize < ($corecount-$totalcores)) {
+    print "Accept\n";
+    } else {
+	print "Reject\n";
+    }
 
 close FILE2;

@@ -63,7 +63,7 @@ public class ResourceOfferRecord {
 		// probably rounds to nearest int?
 		
 		
-		returnedRFQ.setCPUHOURCOST(Integer.toString(minCPUCost+factor));
+		returnedRFQ.setCPUHOURCOST(Integer.toString(minCPUCost));
 		
 		if (returnedRFQ.getARCHITECTURE() != null) {
 		of.setOARCHITECTURE(returnedRFQ.getARCHITECTURE());
