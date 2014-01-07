@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer.Status;
+import uk.ac.ucl.chem.ccs.ramp.resourceiface.QstatInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.TestInterface;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
@@ -82,10 +83,10 @@ public class ResourceAgent extends Agent {
 	
 		
 		System.out.println("Selling for less than " + minPrice);
-		
+		System.setProperty("ramp.price", Integer.toString(minPrice));
 		
 		//TODO: Make interface use user configurable
-		resInter = new TestInterface();
+		resInter = new QstatInterface();
 		
 		
 		addBehaviour(new RFQResponseServer());

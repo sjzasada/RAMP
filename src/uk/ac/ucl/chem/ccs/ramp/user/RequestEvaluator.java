@@ -31,14 +31,19 @@ public class RequestEvaluator {
 		Date offerStart = new Date(myOffer.getONOTBEFORE());
 		Date offerEnd = new Date(myOffer.getODEADLINE());
 		
-		if (cost > offerCost) {
+		if (offerCost > cost) {
 			meetsReq=false;
+			System.err.println("cost too great " + cost + ":" +offerCost);
 		} else if (cpucount > offerCPU) {
 			meetsReq=false;
+			System.err.println("CPU count wrong " + cpucount + ":" +offerCPU);
 		} else if (end.after(offerEnd)) {
 			meetsReq=false;
+			System.err.println("offer ends too soon");
 		} else if (start.before(offerStart)) {
 			meetsReq=false;
+			System.err.println("offer starts too soon");
+
 		}
 		
 		return meetsReq;

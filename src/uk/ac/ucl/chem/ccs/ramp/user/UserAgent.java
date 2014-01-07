@@ -292,7 +292,7 @@ public class UserAgent extends Agent {
 			this.requestID=requestID;
 			Vector<String> v = subRequests.get(requestID);
 			System.err.println ("Request ID " + requestID);
-
+			System.err.println ("Start time: " + initTime);
 			for (String s : v) {
 				this.requests.add(allRequests.get(s));//vector containing all subrequests. 
 				System.err.println ("Adding subrequest " + s);
@@ -434,6 +434,7 @@ public class UserAgent extends Agent {
 							//check offer meets request
 							Request currentRequest = allRequests.get(currentRequestID);
 							if (!RequestEvaluator.offerMeetsRequest(myOffer, currentRequest)) {
+								System.err.println("Rejecting offer " + myOffer.getOFFERID());
 								//reject offer
 								ACLMessage reject = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 								reject.addReceiver(responder);
@@ -550,12 +551,15 @@ public class UserAgent extends Agent {
 				addBehaviour(twoPhase);
 
 				//TODO: need to do cleanup here. 
-				displayMessage("All done!");
-				
+				displayMessage("SUCCESS!");
+
 			} else {
 				fail = true;
 				displayMessage("Insufficient bids received");
 			}
+			
+			System.err.println ("End time: " + System.currentTimeMillis());
+
 
 		}
 
@@ -564,7 +568,7 @@ public class UserAgent extends Agent {
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
-			if (twoPhase.done()) {
+			if (twoPhase.done() || fail) {
 				return true; 
 			} else {
 				return false;
