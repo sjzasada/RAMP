@@ -91,7 +91,8 @@ public class ResourceAgent extends Agent {
 		
 		addBehaviour(new RFQResponseServer());
 		addBehaviour(new PurchaseOrdersServer());
-		
+		addBehaviour(new FinaliseServer());
+
 		
 	}
 	
@@ -157,7 +158,8 @@ public class ResourceAgent extends Agent {
 							 
 							 FirmOffer fo = new FirmOffer(ror, Status.MADE);
 							 
-							 currentOffers.put(rfq.getREQUESTID(), fo);
+//							 currentOffers.put(rfq.getREQUESTID(), fo);
+							 currentOffers.put(ror.getOfferID(), fo);
 							 
 							 	// we can respond
 							 	anyOffers = true;
@@ -211,10 +213,13 @@ public class ResourceAgent extends Agent {
 	
 	private class PurchaseOrdersServer extends CyclicBehaviour {
 		
-		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.AGREE);
+		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 
 		
 		public void action() {
+			
+			System.err.println("Called purchase behaviour");
+
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// ACCEPT_PROPOSAL Message received. Process it
@@ -222,12 +227,17 @@ public class ResourceAgent extends Agent {
 				String offerID = msg.getContent();//TODO - check this is the way to get the offer ID
 				ACLMessage reply = msg.createReply();
 				
+				System.err.println("Accept proposal "+offerID);
+			
 				if (currentOffers.containsKey(offerID)) {
+				
+					System.err.println("We have made this offer");
 					
 					FirmOffer fo = currentOffers.get(offerID);
 					
 					String reservationID = resInter.makeReservation(fo.getRor().getOffer());
 					
+					System.err.println("Made reservation " + reservationID);
 					
 					if (reservationID != null) {
 						fo.setReservationID(reservationID);
@@ -261,7 +271,66 @@ public class ResourceAgent extends Agent {
 		}
 	} 
 	
+	private class FinaliseServer extends CyclicBehaviour {
+		
+		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
 
+		//TODO: This behaviour should periodically examine reservation IDs and remove any that have timed out
+		
+		public void action() {
+			
+
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// CONFIRM Message received. Process it
+				System.err.println("Called confirm behaviour");
+				
+				String offerID = msg.getContent();//TODO - check this is the way to get the offer ID
+				ACLMessage reply = msg.createReply();
+				
+				System.err.println("Accept proposal "+offerID);
+			
+				if (currentOffers.containsKey(offerID)) {
+				
+					System.err.println("We have made this offer");
+					
+					FirmOffer fo = currentOffers.get(offerID);
+					
+					String reservationID = fo.getReservationID();
+					
+					System.err.println("Confirming reservation " + reservationID);
+					
+					if (reservationID != null) {
+						fo.setReservationID(reservationID);
+						fo.setStatus(Status.CONFIRMED);
+						currentOffers.put(offerID, fo);
+						
+						reply.setContent(reservationID);
+						reply.setPerformative(ACLMessage.CONFIRM);
+						System.out.println("Confirmed with agent "+msg.getSender().getName() + " reservation " + reservationID);
+					} else {
+						//can't now satisfy
+						reply.setPerformative(ACLMessage.REFUSE);
+						currentOffers.remove(offerID);
+					}
+					
+					
+				} else {
+					//we didn't make the offer. what are you doing?
+					
+					reply.setPerformative(ACLMessage.FAILURE);
+				}
+							
+				//System.err.println(reply.getInReplyTo());
+				//System.err.println(reply.getConversationId());
+				
+				myAgent.send(reply);
+			}
+			else {
+				block();
+			}
+		}
+	} 
 	
 	//listen for reservation cancellation requests
 	private class CancelServer extends CyclicBehaviour {

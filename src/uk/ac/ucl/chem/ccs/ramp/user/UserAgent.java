@@ -10,6 +10,9 @@
 package uk.ac.ucl.chem.ccs.ramp.user;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
@@ -38,6 +41,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -62,17 +66,30 @@ public class UserAgent extends Agent {
 	//sort out the communications ontologu
 	private Codec codec = new SLCodec(); 
 	private Ontology onto = MarketOntology.getInstance();
-
-
+	private boolean log=true;
+	private PrintWriter writer;
+	
 	//set up agent
 	protected void setup () {
 
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(onto);
 
-		System.err.println("Main ontology in use is " + getContentManager().getOntologyNames()[0]);
-		//register the content language 
 
+
+		if (log) {
+			try {
+				String logfile=getAID().getLocalName();
+				logfile=logfile+System.currentTimeMillis();
+				writer=new PrintWriter("/tmp/"+logfile, "UTF-8");
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
+		}
+		
+		displayMessage("Main ontology in use is " + getContentManager().getOntologyNames()[0]);
+		//register the content language 
+		
 		//check for resource agents periodically
 		addBehaviour(new TickerBehaviour(this, 60000) {
 			public void onStart () {
@@ -90,7 +107,7 @@ public class UserAgent extends Agent {
 					resourceAgents.clear();
 					for (int i=0; i<result.length; ++i) {
 						resourceAgents.addElement(result[i].getName()); //add the agents found to the vector 
-						System.err.println("Found resource agent " + result[i].getName());
+						displayMessage("Found resource agent " + result[i].getName());
 					}
 				} catch (FIPAException fp) {
 					fp.printStackTrace();
@@ -133,6 +150,7 @@ public class UserAgent extends Agent {
 		// print out agent details
 		displayMessage("My name is " + getAID().getLocalName());
 		displayMessage("My GUID is " + getAID().getName());
+		displayMessage("My HAP is " + getAID().getHap());
 		displayMessage("My addresses are:");
 		Iterator<String> it = getAID().getAllAddresses();
 		while (it.hasNext()) {
@@ -159,12 +177,21 @@ public class UserAgent extends Agent {
 		} else {
 			System.out.println(s);
 		}
+		
+		if (log) {
+			//write message to log file
+			writer.println(s);
+		}
+		
 	}
 
 
 	//this is what happens when the agent finishes
 	protected void takeDown() {
 		System.out.println("Agent " + getAID().getName() + " terminated");
+		if (log) {
+			writer.close();
+		}
 		//	this.doDelete();
 	}
 
@@ -230,7 +257,7 @@ public class UserAgent extends Agent {
 		private RequestAQuote (String requestID) {
 			this.requestID=requestID;//permanent reference to this set of requests
 			twoStep = new SequentialBehaviour (myAgent);
-			System.err.println ("Request ID " + requestID);
+			displayMessage("Request ID " + requestID);
 
 		}
 
@@ -253,7 +280,7 @@ public class UserAgent extends Agent {
 
 				//add a second parallel behaviour to process offers
 				pb.addSubBehaviour(new ProcessOffers(requestID));
-				System.err.println ("Request ID " + requestID);
+				displayMessage("Request ID " + requestID);
 
 
 				twoStep.addSubBehaviour(pb);
@@ -285,22 +312,22 @@ public class UserAgent extends Agent {
 		private String requestID;
 
 		private RequestManager (Agent a, String requestID) {
-			super (a, 30000);//30 second tick - could be changable parameter
-			deadline = System.currentTimeMillis() + 120000;//go for 2 mins - could be a changable parameter
+			super (a, 10000);//30 second tick - could be changable parameter
+			deadline = System.currentTimeMillis() + 40000;//go for 2 mins - could be a changable parameter
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
 			this.requestID=requestID;
 			Vector<String> v = subRequests.get(requestID);
-			System.err.println ("Request ID " + requestID);
-			System.err.println ("Start time: " + initTime);
+			displayMessage ("Request ID " + requestID);
+			displayMessage ("Start time: " + initTime);
 			for (String s : v) {
 				this.requests.add(allRequests.get(s));//vector containing all subrequests. 
-				System.err.println ("Adding subrequest " + s);
+				displayMessage ("Adding subrequest " + s);
 			}
 
 			//test code
 			if (requests==null) {
-				System.err.println("Requests is null");
+				displayMessage("Requests is null");
 			}
 
 			this.requestID=requestID;
@@ -351,7 +378,7 @@ public class UserAgent extends Agent {
 				//add each subrequest
 				int i = 0;
 				for (Request r : requests) {
-					System.err.println("Request ID is: " + r.getRequestID() + " --- ffooo ");
+					displayMessage("Request ID is: " + r.getRequestID() + " --- ffooo ");
 					req.addRFQINSTANCE(r.getRFQObject());
 					i++;
 				}
@@ -362,8 +389,8 @@ public class UserAgent extends Agent {
 				//add onto object to message 
 				try {
 					
-					System.err.println("Using ontology " + myAgent.getContentManager().getOntologyNames()[0]);
-					System.err.println("CFP with ontology " + cfp.getOntology());
+					displayMessage("Using ontology " + myAgent.getContentManager().getOntologyNames()[0]);
+					displayMessage("CFP with ontology " + cfp.getOntology());
 					
 
 					myAgent.getContentManager().fillContent(cfp, req);
@@ -419,7 +446,7 @@ public class UserAgent extends Agent {
 						MakeOffer off = (MakeOffer)myAgent.getContentManager().extractContent(reply);
 
 						
-						System.err.println("Got offer");
+						displayMessage("Got offer");
 						
 						//throws exception if we don't understand message
 
@@ -434,7 +461,7 @@ public class UserAgent extends Agent {
 							//check offer meets request
 							Request currentRequest = allRequests.get(currentRequestID);
 							if (!RequestEvaluator.offerMeetsRequest(myOffer, currentRequest)) {
-								System.err.println("Rejecting offer " + myOffer.getOFFERID());
+								displayMessage("Rejecting offer " + myOffer.getOFFERID());
 								//reject offer
 								ACLMessage reject = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 								reject.addReceiver(responder);
@@ -504,6 +531,7 @@ public class UserAgent extends Agent {
 		private HashMap<String, ReceivedOffer> negotiatedOffers = new HashMap<String, ReceivedOffer>();
 		private SequentialBehaviour twoPhase;
 		private boolean fail=false;
+		private int step=0;
 
 		private ResourceNotifier (String requestID) {
 			this.requestID = requestID;
@@ -515,6 +543,10 @@ public class UserAgent extends Agent {
 		public void action() {
 			// TODO Auto-generated method stub
 
+		switch (step) {
+		
+		case 0:
+			
 			displayMessage("Negotiating sale");
 
 			//check we have enough offers
@@ -551,19 +583,27 @@ public class UserAgent extends Agent {
 				addBehaviour(twoPhase);
 
 				//TODO: need to do cleanup here. 
-				displayMessage("SUCCESS!");
 
 			} else {
 				fail = true;
 				displayMessage("Insufficient bids received");
 			}
+			step=1;
+			break;
 			
-			System.err.println ("End time: " + System.currentTimeMillis());
+		default:
+			//do nothing
+			block(1000);
+		} 
+			
 
 
 		}
 
-
+		public int onEnd () {
+			displayMessage ("End time: " + System.currentTimeMillis());
+			return 0;
+		}
 
 		@Override
 		public boolean done() {
@@ -581,7 +621,7 @@ public class UserAgent extends Agent {
 
 		private class PhaseOneBehaviour extends Behaviour {
 			private int step=1;
-			private int offerNo=1;
+			private int offerNo=0;
 			private OfferList<ReceivedOffer> subOffers; 
 			private String subID;
 			private MessageTemplate mt;
@@ -597,10 +637,13 @@ public class UserAgent extends Agent {
 
 				switch (step) {
 				case 1:
-
+					
+					displayMessage("Offer no "+offerNo);
+					
 					//TODO: implement the offer evaluation
 					bestOffer=(ReceivedOffer)subOffers.get(offerNo);
 
+					
 					displayMessage("Best offer (" + bestOffer.getOffer().getOFFERID() + ")from " +bestOffer.getAgent());
 
 					ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
@@ -624,7 +667,7 @@ public class UserAgent extends Agent {
 
 					if(reply != null) {
 						AID responder = reply.getSender();
-						System.err.println("case 2 reached");
+						displayMessage("case 2 reached");
 
 						if (reply.getPerformative() == ACLMessage.AGREE) {
 							//successfully made the bargain
@@ -635,15 +678,23 @@ public class UserAgent extends Agent {
 							step=3;
 						} else {
 							displayMessage("Offer withdrawn by " + responder);
-							step=1;
 
-							offerNo++; //loop to the next offer
+							int totalOffers=subOffers.size()-1;
+							
+							if (offerNo<totalOffers) {
+							
+								step=1;
+								offerNo++; //loop to the next offer
+							
+							} else {
+								step = 3;
+							}
 							
 						}
 
 					} else {
 						block();
-						System.err.println("blocking");
+						//System.err.println("blocking");
 					}
 					break;
 				}//end switch
@@ -666,7 +717,6 @@ public class UserAgent extends Agent {
 			
 			public PhaseTwoBehaviour(String key) {
 				subID=key;
-				finalOffer=negotiatedOffers.get(key);
 			}
 			
 			@Override
@@ -676,14 +726,18 @@ public class UserAgent extends Agent {
 				switch (step) {
 
 				case 1:
-					
+				finalOffer=negotiatedOffers.get(subID);//read the offer that has been made
+				
 				if (confirmedOffers != noUnits) {
 					fail=true;
-					ACLMessage cancel = new ACLMessage(ACLMessage.CANCEL);
-					cancel.addReceiver(finalOffer.getAgent());
-					cancel.setContent(finalOffer.getOffer().getOFFERID());
-					cancel.setConversationId("cancel"+subID);
-					myAgent.send(cancel);
+					//cancel unless this is the missing offer
+					if (finalOffer != null) {
+						ACLMessage cancel = new ACLMessage(ACLMessage.CANCEL);
+						cancel.addReceiver(finalOffer.getAgent());
+						cancel.setContent(finalOffer.getOffer().getOFFERID());
+						cancel.setConversationId("cancel"+subID);
+						myAgent.send(cancel);
+					}
 					step =3;
 					break;
 				} else {
@@ -703,6 +757,7 @@ public class UserAgent extends Agent {
 					if(reply != null) {
 						if (reply.getPerformative() == ACLMessage.CONFIRM) {
 							displayMessage(reply.getContent());
+							displayMessage("SUCCESS!");
 							//display the reservation ID
 						} else {
 							fail=true;
