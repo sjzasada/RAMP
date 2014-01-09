@@ -80,7 +80,7 @@ public class UserAgent extends Agent {
 		if (log) {
 			try {
 				String logfile=getAID().getLocalName();
-				logfile=logfile+System.currentTimeMillis();
+				logfile=logfile+"."+System.currentTimeMillis()+".log";
 				writer=new PrintWriter("/tmp/"+logfile, "UTF-8");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -225,6 +225,7 @@ public class UserAgent extends Agent {
 		Vector<String> subReqs = new Vector<String>();
 
 		for (Request r : v) {
+			displayMessage("+++++NEW JOB+++++");
 			r.setRequestID(requestID+"-"+subid);
 			allRequests.put(requestID+"-"+subid, r);
 			subReqs.add(requestID+"-"+subid);
@@ -456,7 +457,7 @@ public class UserAgent extends Agent {
 						while (itr.hasNext()) {
 							Offer myOffer=itr.next();
 							String currentRequestID = myOffer.getOREQUESTID();//use request ID set by offer
-							displayMessage("Recieved offer " + myOffer.getOFFERID() + " from " + responder);
+							displayMessage("Recieved offer " + myOffer.getOFFERID() + " from " + responder + " for " + myOffer.getOTOTALCORES() + " cores @ " + myOffer.getOCPUHOURCOST());
 
 							//check offer meets request
 							Request currentRequest = allRequests.get(currentRequestID);
@@ -741,6 +742,7 @@ public class UserAgent extends Agent {
 					step =3;
 					break;
 				} else {
+					displayMessage("Got " +confirmedOffers+ " confirmed offers");
 					ACLMessage finalise = new ACLMessage(ACLMessage.CONFIRM);
 					finalise.addReceiver(finalOffer.getAgent());
 					finalise.setContent(finalOffer.getOffer().getOFFERID());
@@ -757,6 +759,8 @@ public class UserAgent extends Agent {
 					if(reply != null) {
 						if (reply.getPerformative() == ACLMessage.CONFIRM) {
 							displayMessage(reply.getContent());
+							displayMessage("winning offer cost: "+finalOffer.getOffer().getOCPUHOURCOST());
+							displayMessage("winning resource: "+reply.getSender().getName());
 							displayMessage("SUCCESS!");
 							//display the reservation ID
 						} else {
@@ -775,6 +779,10 @@ public class UserAgent extends Agent {
 			@Override
 			public boolean done() {
 				// TODO Auto-generated method stub
+				if (step==3 && fail) {
+					displayMessage("FAIL!");
+				}
+				
 				return step==3;
 			}
 

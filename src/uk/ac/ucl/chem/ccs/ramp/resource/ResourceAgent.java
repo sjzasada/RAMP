@@ -9,11 +9,14 @@
  */
 package uk.ac.ucl.chem.ccs.ramp.resource;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
+import javax.swing.SwingUtilities;
 
 import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer.Status;
 import uk.ac.ucl.chem.ccs.ramp.resourceiface.QstatInterface;
@@ -47,7 +50,8 @@ public class ResourceAgent extends Agent {
 	private HashMap<String, FirmOffer> currentOffers = new HashMap<String, FirmOffer>();
 	private int minPrice;
 	private ResourceInterface resInter;
-	
+	private boolean log=true;
+	private PrintWriter writer;
 	private Codec codec = new SLCodec(); 
 	private Ontology onto = MarketOntology.getInstance();
 	
@@ -56,12 +60,22 @@ public class ResourceAgent extends Agent {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(onto);
 		
-		System.out.println("My name is " + getAID().getLocalName());
-		System.out.println("My GUID is " + getAID().getName());
-		System.out.println("My addresses are:");
+		if (log) {
+			try {
+				String logfile=getAID().getLocalName();
+				logfile=logfile+"."+System.currentTimeMillis()+".log";
+				writer=new PrintWriter("/tmp/"+logfile, "UTF-8");
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
+		}
+		
+		displayMessage("My name is " + getAID().getLocalName());
+		displayMessage("My GUID is " + getAID().getName());
+		displayMessage("My addresses are:");
 		Iterator<String> it = getAID().getAllAddresses();
 		while (it.hasNext()) {
-			System.out.println("- " +it.next());
+			displayMessage("- " +it.next());
 		}
 		
 		
@@ -73,7 +87,7 @@ public class ResourceAgent extends Agent {
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd);
-			System.out.println("Registered with DFAgent");
+			displayMessage("Registered with DFAgent");
 		} catch (FIPAException fp) {
 			fp.printStackTrace();
 		}
@@ -82,11 +96,11 @@ public class ResourceAgent extends Agent {
 		minPrice = Integer.parseInt((String)args[0]);
 	
 		
-		System.out.println("Selling for less than " + minPrice);
+		displayMessage("Selling for less than " + minPrice);
 		System.setProperty("ramp.price", Integer.toString(minPrice));
 		
 		//TODO: Make interface use user configurable
-		resInter = new QstatInterface();
+		resInter = new QstatInterface(minPrice, getAID().getLocalName());
 		
 		
 		addBehaviour(new RFQResponseServer());
@@ -96,14 +110,31 @@ public class ResourceAgent extends Agent {
 		
 	}
 	
+	
+	public void displayMessage (final String s) {
+			System.out.println(s);
+		
+		if (log) {
+			//write message to log file
+			writer.println(s);
+		}
+		
+	}
+	
+	
 	protected void takeDown() {
+		
+		if (log) {
+			writer.close();
+		}
+		
 		try {
 			DFService.deregister(this);
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
 		
-		System.out.println("Agent " + getAID().getName() + " terminated");
+		displayMessage("Agent " + getAID().getName() + " terminated");
 	}
 	
 	
@@ -116,10 +147,10 @@ public class ResourceAgent extends Agent {
 			ACLMessage msg = myAgent.receive(mt);
 
 			if (msg != null) {
-				System.err.println("Received request");
-				System.err.println("Agent using ontolgoy " + myAgent.getContentManager().getOntologyNames()[0]);
-				System.err.println("Message using ontology " + msg.getOntology());
-				System.err.println("Message is "+ msg.toString());
+				displayMessage("Received request");
+				displayMessage("Agent using ontolgoy " + myAgent.getContentManager().getOntologyNames()[0]);
+				displayMessage("Message using ontology " + msg.getOntology());
+				displayMessage("Message is "+ msg.toString());
 				
 				ACLMessage reply = msg.createReply();
 				
@@ -130,7 +161,7 @@ public class ResourceAgent extends Agent {
 				//	ContentManager cm = myAgent.getContentManager();
 				//	Action act = (Action) cm.extractContent(msg);
 					MakeRequest req = (MakeRequest)myAgent.getContentManager().extractContent(msg);
-					System.err.println("Action "+ req.toString());
+					displayMessage("Action "+ req.toString());
 
 					
 					Iterator<RFQ> it = req.getAllRFQINSTANCE();
@@ -143,11 +174,11 @@ public class ResourceAgent extends Agent {
 						 RFQ rfq = it.next();
 						 
 						 ResourceOfferRecord ror = resInter.canSatisfy(rfq);//check we can satisfy the offer
-						 
-						 System.err.println("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
+						 displayMessage(resInter.message);
+						 displayMessage("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
 						 
 						 if (ror != null) {
-							 System.err.println("Making offer");
+							 displayMessage("Making offer");
 							 
 							 //TODO: need to check here if we've offered before and cancel offers if resource now cannot satisfy 
 								Random generator = new Random();
@@ -169,11 +200,11 @@ public class ResourceAgent extends Agent {
 							 					 	
 							 	offers.addOFFERINSTANCE(myOffer);
 							 	
-								 System.err.println("Offer " + myOffer.getOREQUESTID() + " for " + myOffer.getOTOTALCORES() + " cores " + " @ " + myOffer.getOCPUHOURCOST());
+								 displayMessage("Offer " + myOffer.getOREQUESTID() + " for " + myOffer.getOTOTALCORES() + " cores " + " @ " + myOffer.getOCPUHOURCOST());
 
 							 	
 							} else {
-								 System.err.println("Not making offer");
+								 displayMessage("Not making offer");
 							}
 						 
 						 //RFQ offer = 
@@ -194,11 +225,11 @@ public class ResourceAgent extends Agent {
 				
 			} catch (OntologyException oe) {
 				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-				System.err.println("Message not understood - ontology");
+				displayMessage("Message not understood - ontology");
 				oe.printStackTrace();
 			} catch (CodecException ce) {
 				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-				System.err.println("Message not understood - codec");
+				displayMessage("Message not understood - codec");
 				ce.printStackTrace();
 			}
 				
@@ -218,7 +249,7 @@ public class ResourceAgent extends Agent {
 		
 		public void action() {
 			
-			System.err.println("Called purchase behaviour");
+			displayMessage("Called purchase behaviour");
 
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
@@ -227,17 +258,17 @@ public class ResourceAgent extends Agent {
 				String offerID = msg.getContent();//TODO - check this is the way to get the offer ID
 				ACLMessage reply = msg.createReply();
 				
-				System.err.println("Accept proposal "+offerID);
+				displayMessage("Accept proposal "+offerID);
 			
 				if (currentOffers.containsKey(offerID)) {
 				
-					System.err.println("We have made this offer");
+					displayMessage("We have made this offer");
 					
 					FirmOffer fo = currentOffers.get(offerID);
 					
 					String reservationID = resInter.makeReservation(fo.getRor().getOffer());
-					
-					System.err.println("Made reservation " + reservationID);
+					 displayMessage(resInter.message);
+					displayMessage("Made reservation " + reservationID);
 					
 					if (reservationID != null) {
 						fo.setReservationID(reservationID);
@@ -246,7 +277,7 @@ public class ResourceAgent extends Agent {
 						
 						reply.setContent(reservationID);
 						reply.setPerformative(ACLMessage.AGREE);
-						System.out.println("Made deal with agent "+msg.getSender().getName() + " reservation " + reservationID);
+						displayMessage("Made deal with agent "+msg.getSender().getName() + " reservation " + reservationID);
 					} else {
 						//can't now satisfy
 						reply.setPerformative(ACLMessage.REFUSE);
@@ -260,8 +291,8 @@ public class ResourceAgent extends Agent {
 					reply.setPerformative(ACLMessage.FAILURE);
 				}
 							
-				//System.err.println(reply.getInReplyTo());
-				//System.err.println(reply.getConversationId());
+				//displayMessage(reply.getInReplyTo());
+				//displayMessage(reply.getConversationId());
 				
 				myAgent.send(reply);
 			}
@@ -283,22 +314,22 @@ public class ResourceAgent extends Agent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// CONFIRM Message received. Process it
-				System.err.println("Called confirm behaviour");
+				displayMessage("Called confirm behaviour");
 				
 				String offerID = msg.getContent();//TODO - check this is the way to get the offer ID
 				ACLMessage reply = msg.createReply();
 				
-				System.err.println("Accept proposal "+offerID);
+				displayMessage("Accept proposal "+offerID);
 			
 				if (currentOffers.containsKey(offerID)) {
 				
-					System.err.println("We have made this offer");
+					displayMessage("We have made this offer");
 					
 					FirmOffer fo = currentOffers.get(offerID);
 					
 					String reservationID = fo.getReservationID();
 					
-					System.err.println("Confirming reservation " + reservationID);
+					displayMessage("Confirming reservation " + reservationID);
 					
 					if (reservationID != null) {
 						fo.setReservationID(reservationID);
@@ -307,7 +338,7 @@ public class ResourceAgent extends Agent {
 						
 						reply.setContent(reservationID);
 						reply.setPerformative(ACLMessage.CONFIRM);
-						System.out.println("Confirmed with agent "+msg.getSender().getName() + " reservation " + reservationID);
+						displayMessage("Confirmed with agent "+msg.getSender().getName() + " reservation " + reservationID);
 					} else {
 						//can't now satisfy
 						reply.setPerformative(ACLMessage.REFUSE);
@@ -321,8 +352,8 @@ public class ResourceAgent extends Agent {
 					reply.setPerformative(ACLMessage.FAILURE);
 				}
 							
-				//System.err.println(reply.getInReplyTo());
-				//System.err.println(reply.getConversationId());
+				//displayMessage(reply.getInReplyTo());
+				//displayMessage(reply.getConversationId());
 				
 				myAgent.send(reply);
 			}

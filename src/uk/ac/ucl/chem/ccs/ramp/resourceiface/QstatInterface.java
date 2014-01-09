@@ -26,9 +26,18 @@ public class QstatInterface implements ResourceInterface {
 	private String qstat="/home/stef/workspace/RAMP/data/queuedata/fake_qstat2.pl";
 	private String qrstat="/home/stef/workspace/RAMP/data/queuedata/fake_qrstat2.pl";
 	
+	private int price;
+	private String confile;
+	public String message="";
+	
+	public QstatInterface (int i, String file) {
+		price=i;
+		confile=System.getProperty("ramp.conffile")+"/"+file+".timefile";
+	}
+	
 	public ResourceOfferRecord canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
-		
+		message="";
 		int cpucount = c.getTOTALCORES();
 		String when = c.getNOTBEFORE();
 		
@@ -37,11 +46,8 @@ public class QstatInterface implements ResourceInterface {
 		long n = System.currentTimeMillis();
 		
 		l=(l-n)/1000;
-				
-		int price = Integer.parseInt(System.getProperty("ramp.price")); 	
-		String confile=System.getProperty("ramp.conffile");
-		
-		System.out.println("Looking to buy " + cpucount + " in " + l + " seconds");
+					
+		message = "Looking to buy " + cpucount + " in " + l + " seconds\n";
 		
 		float factor=0.0f; 
 		String result="";
@@ -70,7 +76,7 @@ public class QstatInterface implements ResourceInterface {
 	
 	       int offerprice=Math.round(price*factor);
 	       
-	       System.out.println("resource: " + result + " @ cost " + offerprice);
+	       message = message + "resource: " + result + " @ cost " + offerprice+"\n";
 	       
 	       int requestprice = Integer.parseInt(c.getCPUHOURCOST());
 	       
@@ -83,7 +89,7 @@ public class QstatInterface implements ResourceInterface {
 	}
 
 	public String makeReservation(Offer c) {
-		
+		message="";
 		int cpucount = c.getOTOTALCORES();
 		String when = c.getONOTBEFORE();
 		
@@ -93,9 +99,9 @@ public class QstatInterface implements ResourceInterface {
 		
 		l=(l-n)/1000;
 				
-		String confile=System.getProperty("ramp.conffile");
+		//String confile=System.getProperty("ramp.conffile");
 		
-		System.out.println("Looking to reserve " + cpucount + " in " + l + " seconds");
+		message = "Looking to reserve " + cpucount + " in " + l + " seconds\n";
 		
 		String result="";
 		
@@ -132,10 +138,9 @@ public class QstatInterface implements ResourceInterface {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		System.setProperty("ramp.price", "10");
-		System.setProperty("ramp.conffile", "/tmp/dibble.timefile");
+		System.setProperty("ramp.conffile", "/");
 
-		QstatInterface qi = new QstatInterface();
+		QstatInterface qi = new QstatInterface(10, "dibble");
 		
 		Request myRequest = new Request();	
 		myRequest.load("/home/stef/workspace/RAMP/RFQs/rfq.xml");

@@ -5,6 +5,8 @@ import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
 
 public interface ResourceInterface {
+	
+	public String message="";
 
 	public ResourceOfferRecord canSatisfy (RFQ c);
 	
