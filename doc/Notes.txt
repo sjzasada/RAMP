@@ -30,3 +30,11 @@ To run the Buyer
 -container buyer:jade.examples.bookTrading.BookBuyerAgent("lord of the rings")
 
 -container -local-host localhost -port 9001  buyer:jade.examples.bookTrading.BookBuyerAgent("lord of the rings")
+
+
+
+
+-gui -host localhost -port 9001  intrepid1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");intrepid2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");ricc1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("4");ricc2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("4");intrepid3:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");curie1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("7");thunderer1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("6");atlas1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("3");curie2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("7");thunderer2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("6");
+
+-Dramp.conffile=/home/stef/workspace/RAMP/experiments/machine-conf
+
