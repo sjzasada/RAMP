@@ -22,7 +22,7 @@ public class TestInterface implements ResourceInterface {
 	 * @see uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface#canSatisfy(uk.ac.ucl.chem.ccs.ramp.rfq.Request)
 	 */
 	
-	public ResourceOfferRecord canSatisfy(RFQ c) {
+	public float canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
 		
 		ResourceOfferRecord ror = new ResourceOfferRecord(minCPUCost, c);
@@ -31,10 +31,10 @@ public class TestInterface implements ResourceInterface {
 		//float prob = generator.nextFloat();
 		float prob = 1.0f;
 		if (prob > 0.5) {
-			return ror;
+			return 1.0f;
 		}
 		
-		return null;
+		return -1.0f;
 	}
 
 

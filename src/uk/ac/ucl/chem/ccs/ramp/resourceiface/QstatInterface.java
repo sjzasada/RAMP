@@ -35,7 +35,7 @@ public class QstatInterface implements ResourceInterface {
 		confile=System.getProperty("ramp.conffile")+"/"+file+".timefile";
 	}
 	
-	public ResourceOfferRecord canSatisfy(RFQ c) {
+	public float canSatisfy(RFQ c) {
 		// TODO Auto-generated method stub
 		message="";
 		int cpucount = c.getTOTALCORES();
@@ -73,19 +73,13 @@ public class QstatInterface implements ResourceInterface {
 	       } catch (Exception e) {
 	    	   e.printStackTrace();
 	       }
-	
-	       int offerprice=Math.round(price*factor);
-	       
-	       message = message + "resource: " + result + " @ cost " + offerprice+"\n";
-	       
-	       int requestprice = Integer.parseInt(c.getCPUHOURCOST());
-	       
-	       if (result.equals("Accept") && offerprice <= requestprice) {
-	    	   ResourceOfferRecord ror = new ResourceOfferRecord(offerprice, c);
-	    	   return ror;
+		       
+	       	       
+	       if (result.equals("Accept")) {
+	    	   return factor;
 	       }
 	       
-		return null;
+		return -1.0f;
 	}
 
 	public String makeReservation(Offer c) {
@@ -145,13 +139,13 @@ public class QstatInterface implements ResourceInterface {
 		Request myRequest = new Request();	
 		myRequest.load("/home/stef/workspace/RAMP/RFQs/rfq.xml");
 		
-		ResourceOfferRecord ro = qi.canSatisfy(myRequest.getRFQObject());
+		//ResourceOfferRecord ro = qi.canSatisfy(myRequest.getRFQObject());
 
-	      System.out.println("cost " + ro.getMinCPUCost() + " offer " + ro.getOffer().getOCPUHOURCOST());
+	   //   System.out.println("cost " + ro.getMinCPUCost() + " offer " + ro.getOffer().getOCPUHOURCOST());
 
-		String resID = qi.makeReservation(ro.getOffer());
+		//String resID = qi.makeReservation(ro.getOffer());
 		
-		System.err.println("Reservation " + resID);
+		//System.err.println("Reservation " + resID);
 
 		
 	}

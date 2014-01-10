@@ -48,6 +48,7 @@ import jade.lang.acl.MessageTemplate;
 public class ResourceAgent extends Agent {
 
 	private HashMap<String, FirmOffer> currentOffers = new HashMap<String, FirmOffer>();
+	private HashMap<String, String> offerLookup = new HashMap<String, String>();
 	private int minPrice;
 	private ResourceInterface resInter;
 	private boolean log=true;
@@ -173,11 +174,23 @@ public class ResourceAgent extends Agent {
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();
 						 
-						 ResourceOfferRecord ror = resInter.canSatisfy(rfq);//check we can satisfy the offer
+						 float factor = resInter.canSatisfy(rfq);//check we can satisfy the offer
 						 displayMessage(resInter.message);
 						 displayMessage("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
 						 
-						 if (ror != null) {
+						 if (factor != -1.0f) {
+							 if (offerLookup.containsKey(rfq.getREQUESTID())) { 
+								 FirmOffer oldRoR = currentOffers.get(offerLookup.get(rfq.getREQUESTID()));
+								 int previousCost = oldRoR.getRor().getMinCPUCost();
+					
+								 
+							 } else {
+								 
+								 int decrement=
+								 
+								 
+							 }
+							 
 							 displayMessage("Making offer");
 							 
 							 //TODO: need to check here if we've offered before and cancel offers if resource now cannot satisfy 
@@ -203,9 +216,7 @@ public class ResourceAgent extends Agent {
 								 displayMessage("Offer " + myOffer.getOREQUESTID() + " for " + myOffer.getOTOTALCORES() + " cores " + " @ " + myOffer.getOCPUHOURCOST());
 
 							 	
-							} else {
-								 displayMessage("Not making offer");
-							}
+							} 
 						 
 						 //RFQ offer = 
 						 
@@ -220,6 +231,7 @@ public class ResourceAgent extends Agent {
 				} else	  {
 					//decline
 					reply.setPerformative(ACLMessage.REFUSE);
+					 displayMessage("Not making offer");
 				}
 				
 				

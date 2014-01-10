@@ -8,7 +8,7 @@ public interface ResourceInterface {
 	
 	public String message="";
 
-	public ResourceOfferRecord canSatisfy (RFQ c);
+	public float canSatisfy (RFQ c);
 	
 	public String makeReservation (Offer c);
 }
