@@ -5,6 +5,7 @@ package uk.ac.ucl.chem.ccs.ramp.resourceiface;
 
 import java.util.Random;
 
+import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer;
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
@@ -22,7 +23,7 @@ public class TestInterface implements ResourceInterface {
 	 * @see uk.ac.ucl.chem.ccs.ramp.resourceiface.ResourceInterface#canSatisfy(uk.ac.ucl.chem.ccs.ramp.rfq.Request)
 	 */
 	
-	public float canSatisfy(RFQ c) {
+	public ResourceOfferRecord canSatisfy(RFQ c, FirmOffer oldRor) {
 		// TODO Auto-generated method stub
 		
 		ResourceOfferRecord ror = new ResourceOfferRecord(minCPUCost, c);
@@ -31,10 +32,10 @@ public class TestInterface implements ResourceInterface {
 		//float prob = generator.nextFloat();
 		float prob = 1.0f;
 		if (prob > 0.5) {
-			return 1.0f;
+			return ror;
 		}
 		
-		return -1.0f;
+		return null;
 	}
 
 
@@ -42,5 +43,8 @@ public class TestInterface implements ResourceInterface {
 		// TODO Auto-generated method stub
 		return "123456";
 	}
+
+
+
 
 }

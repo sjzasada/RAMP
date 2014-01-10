@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
+import uk.ac.ucl.chem.ccs.ramp.resource.FirmOffer;
 import uk.ac.ucl.chem.ccs.ramp.resource.ResourceOfferRecord;
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
@@ -27,16 +28,18 @@ public class QstatInterface implements ResourceInterface {
 	private String qrstat="/home/stef/workspace/RAMP/data/queuedata/fake_qrstat2.pl";
 	
 	private int price;
+	private int minPrice;
 	private String confile;
 	public String message="";
 	
-	public QstatInterface (int i, String file) {
-		price=i;
+	public QstatInterface (int i, int j, String file) {
+		minPrice=i;
+		price=j;
 		confile=System.getProperty("ramp.conffile")+"/"+file+".timefile";
 	}
 	
-	public float canSatisfy(RFQ c) {
-		// TODO Auto-generated method stub
+	public ResourceOfferRecord canSatisfy(RFQ c, FirmOffer oldRor) {
+		// check whether resource can satisfy request
 		message="";
 		int cpucount = c.getTOTALCORES();
 		String when = c.getNOTBEFORE();
@@ -71,15 +74,55 @@ public class QstatInterface implements ResourceInterface {
 	            } 
 	            
 	       } catch (Exception e) {
-	    	   e.printStackTrace();
+	    	   //e.printStackTrace();
+	    	   return null;
 	       }
-		       
-	       	       
+	
+
+	       	   
+	       //if the resource is accepting the job, calculate the price
 	       if (result.equals("Accept")) {
-	    	   return factor;
+	       
+		   int requestprice = Integer.parseInt(c.getCPUHOURCOST());
+		    int previousprice = 0;
+		    if (oldRor != null) {
+		      previousprice = oldRor.getRor().getMinCPUCost();
+		    }
+	    	   
+		    if (previousprice>=requestprice) {
+		    	message=message+"We're already offering a winning price - no bid";
+		    	return null;//if we've already got a winning offer, don't bid
+		    }
+		    
+	       int decreaseSteps=4;
+	       factor=1.0f-factor;//%unallocated
+	       float decrement=(price-minPrice)/decreaseSteps*factor;
+	       
+	       int offerprice=price;
+	       
+	       //decrease the price 
+	       for (int f=0; f<=decreaseSteps;f++) {
+	    	   if (requestprice>offerprice) {
+	    		   offerprice=Math.round(price-decrement);
+	    	   }
+	    	   
 	       }
 	       
-		return -1.0f;
+	       
+	       
+	       if (offerprice>requestprice) {
+	    	   message = message+"offer price greater than request price\n";
+	    	   return null;
+	       }
+	       
+	       message = message + "resource: " + result + " @ cost " + offerprice+"\n";
+	       
+	       
+	    	   ResourceOfferRecord ror = new ResourceOfferRecord(offerprice, c);
+	    	   return ror;
+	       }
+	       
+		return null;
 	}
 
 	public String makeReservation(Offer c) {
@@ -132,20 +175,20 @@ public class QstatInterface implements ResourceInterface {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		System.setProperty("ramp.conffile", "/");
+/*		System.setProperty("ramp.conffile", "/");
 
 		QstatInterface qi = new QstatInterface(10, "dibble");
 		
 		Request myRequest = new Request();	
 		myRequest.load("/home/stef/workspace/RAMP/RFQs/rfq.xml");
 		
-		//ResourceOfferRecord ro = qi.canSatisfy(myRequest.getRFQObject());
+		ResourceOfferRecord ro = qi.canSatisfy(myRequest.getRFQObject());
 
-	   //   System.out.println("cost " + ro.getMinCPUCost() + " offer " + ro.getOffer().getOCPUHOURCOST());
+	      System.out.println("cost " + ro.getMinCPUCost() + " offer " + ro.getOffer().getOCPUHOURCOST());
 
-		//String resID = qi.makeReservation(ro.getOffer());
+		String resID = qi.makeReservation(ro.getOffer());
 		
-		//System.err.println("Reservation " + resID);
+		System.err.println("Reservation " + resID);*/
 
 		
 	}

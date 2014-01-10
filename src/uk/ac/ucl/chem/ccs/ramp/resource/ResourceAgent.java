@@ -48,8 +48,8 @@ import jade.lang.acl.MessageTemplate;
 public class ResourceAgent extends Agent {
 
 	private HashMap<String, FirmOffer> currentOffers = new HashMap<String, FirmOffer>();
-	private HashMap<String, String> offerLookup = new HashMap<String, String>();
-	private int minPrice;
+	private HashMap<String, String> offerLookup = new HashMap<String,String>();
+	private int minPrice, midPrice;
 	private ResourceInterface resInter;
 	private boolean log=true;
 	private PrintWriter writer;
@@ -95,13 +95,14 @@ public class ResourceAgent extends Agent {
 		
 		Object args[] = getArguments();
 		minPrice = Integer.parseInt((String)args[0]);
-	
+		midPrice = Integer.parseInt((String)args[1]);
+
 		
 		displayMessage("Selling for less than " + minPrice);
-		System.setProperty("ramp.price", Integer.toString(minPrice));
+		//System.setProperty("ramp.price", Integer.toString(minPrice));
 		
 		//TODO: Make interface use user configurable
-		resInter = new QstatInterface(minPrice, getAID().getLocalName());
+		resInter = new QstatInterface(minPrice, midPrice, getAID().getLocalName());
 		
 		
 		addBehaviour(new RFQResponseServer());
@@ -174,23 +175,19 @@ public class ResourceAgent extends Agent {
 					while (it.hasNext()) {
 						 RFQ rfq = it.next();
 						 
-						 float factor = resInter.canSatisfy(rfq);//check we can satisfy the offer
+						 ResourceOfferRecord ror;
+						 
+						 if (offerLookup.containsKey(rfq.getREQUESTID())) {
+							 ror= resInter.canSatisfy(rfq, currentOffers.get(offerLookup.get(rfq.getREQUESTID())));//check we can satisfy the offer
+						 } else {
+							 ror= resInter.canSatisfy(rfq, null);
+						 }
+						 
+						 
 						 displayMessage(resInter.message);
 						 displayMessage("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
 						 
-						 if (factor != -1.0f) {
-							 if (offerLookup.containsKey(rfq.getREQUESTID())) { 
-								 FirmOffer oldRoR = currentOffers.get(offerLookup.get(rfq.getREQUESTID()));
-								 int previousCost = oldRoR.getRor().getMinCPUCost();
-					
-								 
-							 } else {
-								 
-								 int decrement=
-								 
-								 
-							 }
-							 
+						 if (ror != null) {
 							 displayMessage("Making offer");
 							 
 							 //TODO: need to check here if we've offered before and cancel offers if resource now cannot satisfy 
@@ -204,7 +201,8 @@ public class ResourceAgent extends Agent {
 							 
 //							 currentOffers.put(rfq.getREQUESTID(), fo);
 							 currentOffers.put(ror.getOfferID(), fo);
-							 
+							 offerLookup.remove(rfq.getREQUESTID());//get rid of old lookup
+							 offerLookup.put(rfq.getREQUESTID(), ror.getOfferID());//should get rid of old offers
 							 	// we can respond
 							 	anyOffers = true;
 							 	
@@ -216,7 +214,9 @@ public class ResourceAgent extends Agent {
 								 displayMessage("Offer " + myOffer.getOREQUESTID() + " for " + myOffer.getOTOTALCORES() + " cores " + " @ " + myOffer.getOCPUHOURCOST());
 
 							 	
-							} 
+							} else {
+								 displayMessage("Not making offer");
+							}
 						 
 						 //RFQ offer = 
 						 
@@ -231,7 +231,6 @@ public class ResourceAgent extends Agent {
 				} else	  {
 					//decline
 					reply.setPerformative(ACLMessage.REFUSE);
-					 displayMessage("Not making offer");
 				}
 				
 				
