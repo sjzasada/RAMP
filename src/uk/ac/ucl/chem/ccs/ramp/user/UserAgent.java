@@ -28,6 +28,7 @@ import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeOffer;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MakeRequest;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.MarketOntology;
 import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.Offer;
+import uk.ac.ucl.chem.ccs.ramp.rfq.manualonto.RFQ;
 
 
 import jade.content.ContentManager;
@@ -376,11 +377,34 @@ public class UserAgent extends Agent {
 				//TODO: !!!!!!!!!!!!!!
 				//TODO: !!!!!!!!!!!!!!
 
+				
+
+				
 				//add each subrequest
 				int i = 0;
 				for (Request r : requests) {
 					displayMessage("Request ID is: " + r.getRequestID() + " --- ffooo ");
-					req.addRFQINSTANCE(r.getRFQObject());
+					
+					
+					OfferList ol = allOffers.get(r.getRequestID());
+
+					RFQ rfq = r.getRFQObject();
+					
+					if (ol != null) {
+						displayMessage("Found existing offer");
+						displayMessage("Current cost is "+ rfq.getCPUHOURCOST());
+
+						ReceivedOffer ro = (ReceivedOffer) ol.get(0);
+						if (ro != null) {
+							rfq.setCPUHOURCOST(ro.getOffer().getOCPUHOURCOST());
+							displayMessage("Setting new cost to "+ rfq.getCPUHOURCOST());
+
+						}
+						
+					}		
+					
+					
+					req.addRFQINSTANCE(rfq);
 					i++;
 				}
 
