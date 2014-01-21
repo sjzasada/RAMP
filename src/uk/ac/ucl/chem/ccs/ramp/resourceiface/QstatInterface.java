@@ -75,6 +75,7 @@ public class QstatInterface implements ResourceInterface {
 	            
 	       } catch (Exception e) {
 	    	   //e.printStackTrace();
+	    	   message=message+"Error parsing qstat data\n";
 	    	   return null;
 	       }
 	
@@ -83,27 +84,36 @@ public class QstatInterface implements ResourceInterface {
 	       //if the resource is accepting the job, calculate the price
 	       if (result.equals("Accept")) {
 	       
+
+	    	   
+	    	   
 		   int requestprice = Integer.parseInt(c.getCPUHOURCOST());
 		    int previousprice = 0;
 		    if (oldRor != null) {
 		      previousprice = oldRor.getRor().getMinCPUCost();
 		    }
-	    	   
+
+
+		    
 		    if (previousprice>=requestprice) {
-		    	message=message+"We're already offering a winning price - no bid";
+		    	message=message+"We're already offering a winning price - no bid\n";
 		    	return null;//if we've already got a winning offer, don't bid
 		    }
+		    int offerprice;
+	    	   if (requestprice >= price) {
+	    		   offerprice=price;
+	    	   } else {
 		    
 	       int decreaseSteps=4;
 	       factor=1.0f-factor;//%unallocated
 	       float decrement=(price-minPrice)/decreaseSteps*factor;
-	       
-	       int offerprice=price;
+	       message=message+"decrement is "+decrement+"\n";
+	       offerprice=price;
 	       
 	       //decrease the price 
 	       for (int f=0; f<=decreaseSteps;f++) {
-	    	   if (requestprice>offerprice) {
-	    		   offerprice=Math.round(price-decrement);
+	    	   if (requestprice>offerprice && offerprice > minPrice) {
+	    		   offerprice=Math.round(requestprice-decrement);
 	    	   }
 	    	   
 	       }
@@ -114,14 +124,14 @@ public class QstatInterface implements ResourceInterface {
 	    	   message = message+"offer price greater than request price\n";
 	    	   return null;
 	       }
-	       
+	    	   }
 	       message = message + "resource: " + result + " @ cost " + offerprice+"\n";
 	       
 	       
 	    	   ResourceOfferRecord ror = new ResourceOfferRecord(offerprice, c);
 	    	   return ror;
 	       }
-	       
+	       message = message + "qstat returned reject\n";
 		return null;
 	}
 

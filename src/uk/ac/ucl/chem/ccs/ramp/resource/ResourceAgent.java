@@ -50,7 +50,7 @@ public class ResourceAgent extends Agent {
 	private HashMap<String, FirmOffer> currentOffers = new HashMap<String, FirmOffer>();
 	private HashMap<String, String> offerLookup = new HashMap<String,String>();
 	private int minPrice, midPrice;
-	private ResourceInterface resInter;
+	private QstatInterface resInter;
 	private boolean log=true;
 	private PrintWriter writer;
 	private Codec codec = new SLCodec(); 
@@ -98,7 +98,7 @@ public class ResourceAgent extends Agent {
 		midPrice = Integer.parseInt((String)args[1]);
 
 		
-		displayMessage("Selling for less than " + minPrice);
+		displayMessage("Selling for less than " + midPrice);
 		//System.setProperty("ramp.price", Integer.toString(minPrice));
 		
 		//TODO: Make interface use user configurable
@@ -184,7 +184,7 @@ public class ResourceAgent extends Agent {
 						 }
 						 
 						 
-						 displayMessage(resInter.message);
+						 displayMessage("Resource Interface: "+resInter.message);
 						 displayMessage("Request " + rfq.getREQUESTID() + " for " + rfq.getTOTALCORES() + " cores " + " @ " + rfq.getCPUHOURCOST());
 						 
 						 if (ror != null) {
