@@ -100,9 +100,9 @@ public class QstatInterface implements ResourceInterface {
 		    	return null;//if we've already got a winning offer, don't bid
 		    }
 		    int offerprice;
-	    	   if (requestprice >= price) {
-	    		   offerprice=price;
-	    	   } else {
+	    //	   if (requestprice >= price) {
+	    //		   offerprice=price;
+	    //	   } else {
 		    
 	       int decreaseSteps=4;
 	       factor=1.0f-factor;//%unallocated
@@ -110,13 +110,21 @@ public class QstatInterface implements ResourceInterface {
 	       message=message+"decrement is "+decrement+"\n";
 	       offerprice=price;
 	       
+		   offerprice=Math.round(requestprice-decrement);
+
+	       
 	       //decrease the price 
-	       for (int f=0; f<=decreaseSteps;f++) {
-	    	   if (requestprice>offerprice && offerprice > minPrice) {
-	    		   offerprice=Math.round(requestprice-decrement);
+	       //for (int f=0; f<=decreaseSteps;f++) {
+	    	   if (offerprice < minPrice) {
+	    		   if (minPrice <= requestprice) {
+	    			   offerprice=minPrice;
+	    		   } else {
+	    		   message=message+"we've gone too low\n";
+	    		   return null;
+	    		   }
 	    	   }
 	    	   
-	       }
+	     //  }
 	       
 	       
 	       
@@ -124,7 +132,7 @@ public class QstatInterface implements ResourceInterface {
 	    	   message = message+"offer price greater than request price\n";
 	    	   return null;
 	       }
-	    	   }
+	    	//   }
 	       message = message + "resource: " + result + " @ cost " + offerprice+"\n";
 	       
 	       

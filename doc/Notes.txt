@@ -34,7 +34,6 @@ To run the Buyer
 
 
 
--gui -host localhost -port 9001  intrepid1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");intrepid2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");ricc1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("4");ricc2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("4");intrepid3:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("5");curie1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("7");thunderer1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("6");atlas1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("3");curie2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("7");thunderer2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("6");
-
+-gui -host localhost -port 9001  intrepid1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","50");intrepid2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","50");ricc1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","40");ricc2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","40");intrepid3:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","50");curie1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("40","80");thunderer1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("40","70");atlas1:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("25","30");curie2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("60","80");thunderer2:uk.ac.ucl.chem.ccs.ramp.resource.ResourceAgent("60","70");
 -Dramp.conffile=/home/stef/workspace/RAMP/experiments/machine-conf
 
