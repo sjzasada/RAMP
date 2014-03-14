@@ -137,6 +137,7 @@ public class UserAgent extends Agent {
 				//operate cmd line, with just a request file
 				Request myRequest = new Request();	
 				myRequest.load(argument); //load the request file
+				displayMessage("Loading file " + argument);
 				displayMessage("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
 
 				requestQuote(myRequest);
@@ -315,7 +316,7 @@ public class UserAgent extends Agent {
 
 		private RequestManager (Agent a, String requestID) {
 			super (a, 10000);//30 second tick - could be changable parameter
-			deadline = System.currentTimeMillis() + 40000;//go for 2 mins - could be a changable parameter
+			deadline = System.currentTimeMillis() + 11000;//go for 2 mins - could be a changable parameter
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
 			this.requestID=requestID;
@@ -612,6 +613,7 @@ public class UserAgent extends Agent {
 			} else {
 				fail = true;
 				displayMessage("Insufficient bids received");
+				displayMessage("FAIL");
 			}
 			step=1;
 			break;
