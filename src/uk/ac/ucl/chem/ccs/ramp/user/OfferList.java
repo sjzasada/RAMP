@@ -55,7 +55,13 @@ public class OfferList<E> extends Vector {
 					
 			 }
 			 //count should be the position to insert this offer
-			 add(count,o);
+			 if (count==size()) {
+				 add(o);
+			 } else {
+				 add(count,o);
+			 
+			}
+			 System.err.println("ADDING OFFER AT POSITION "+count);
 			return true;
 		}
 		

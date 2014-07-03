@@ -40,6 +40,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Runtime;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -53,6 +54,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.wrapper.StaleProxyException;
 
 public class UserAgent extends Agent {
 
@@ -69,7 +71,9 @@ public class UserAgent extends Agent {
 	private Ontology onto = MarketOntology.getInstance();
 	private boolean log=true;
 	private PrintWriter writer;
-	
+	private boolean rungui=false;
+	private int ROUNDTIME=60000;
+	private int NOROUNDS=2;
 	//set up agent
 	protected void setup () {
 
@@ -121,18 +125,47 @@ public class UserAgent extends Agent {
 
 
 		// if the argument is a directory, open a GUI, else open the file;
-		if (args.length == 1) {
+		if (args.length >= 1) {
 
 			String argument=(String)args[0];
 
+			
+			if (args.length==3) {
+				ROUNDTIME=Integer.parseInt((String)args[1]);
+				NOROUNDS=Integer.parseInt((String)args[2]);
+			}
+			
+			displayMessage("Round time="+ROUNDTIME+" with "+NOROUNDS+" rounds");
+			
 			File f = new File(argument);
 			if (f.isDirectory()) {
 				//open a GUI and load the directory of requests
+			if (rungui) {
 				myGui=new UserGui(this);
 				myGui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				myGui.setVisible(true);
 				myGui.loadDir(argument);
 
+			}else {
+				File fo = new File(argument);
+				Vector<Request> v = new Vector<Request>();
+
+				//call the main requestQuote method
+				//requestQuote(v);		
+				if(fo.isDirectory()) {
+					String internalNames[] = fo.list();
+						for(int i=0; i<internalNames.length; i++) {
+							String fullfile = fo.getAbsolutePath() + File.separator + internalNames[i];
+							Request myRequest = new Request();	
+							myRequest.load(fullfile); //load the request file
+							displayMessage("Loading file " + argument);
+							displayMessage("Looking to buy " + myRequest.getCPUCount() + " cores for less than " + myRequest.getCPUCost() + " before " + myRequest.getEnd());
+							v.add(myRequest);
+						} 
+						displayMessage("Buying "+internalNames.length+ " units");
+						requestQuote(v);
+				}
+			}
 			} else {
 				//operate cmd line, with just a request file
 				Request myRequest = new Request();	
@@ -315,8 +348,9 @@ public class UserAgent extends Agent {
 		private String requestID;
 
 		private RequestManager (Agent a, String requestID) {
-			super (a, 10000);//30 second tick - could be changable parameter
-			deadline = System.currentTimeMillis() + 11000;//go for 2 mins - could be a changable parameter
+			super (a, ROUNDTIME);//30 second tick - could be changable parameter
+			int fin = ROUNDTIME*NOROUNDS;			
+			deadline = System.currentTimeMillis() + fin-100;//go for 2 mins - could be a changable parameter
 			initTime = System.currentTimeMillis();
 			deltaT=deadline - initTime;
 			this.requestID=requestID;
@@ -349,7 +383,7 @@ public class UserAgent extends Agent {
 				stop();
 			} else {
 				displayMessage("Starting new resource request. Current time " + currentTime + " deadline " + deadline);
-				displayMessage("Bidding round " + ++round);
+				displayMessage("Bidding round " + ++round + " started at "+currentTime);
 
 				ACLMessage cfp = new ACLMessage(ACLMessage.CFP);				
 				Iterator<AID> it = resourceAgents.iterator();
@@ -399,7 +433,8 @@ public class UserAgent extends Agent {
 						if (ro != null) {
 							rfq.setCPUHOURCOST(ro.getOffer().getOCPUHOURCOST());
 							displayMessage("Setting new cost to "+ rfq.getCPUHOURCOST());
-
+							r.setCPUCost(Integer.parseInt(ro.getOffer().getOCPUHOURCOST()));
+							requests.set(i, r);
 						}
 						
 					}		
@@ -442,22 +477,34 @@ public class UserAgent extends Agent {
 		private String requestID;
 		private int step = 0;
 		private int repliesCount = 0;
-
-
+		private int biddingRound=1;
 		private MessageTemplate mt;
-
+		private int repliesExpected;
+		
 		ProcessOffers (String requestID) {
 			this.requestID=requestID;
 			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("compute-auction-"+requestID),
 					MessageTemplate.MatchInReplyTo("cfp"+requestID));
+			
+			int s = resourceAgents.size();
+			int r = subRequests.get(requestID).size();
+			repliesExpected=s;
 
 		}
 
 		public void action () {
 
-
 			ACLMessage reply = myAgent.receive(mt);
 			if (reply != null) {
+				repliesCount++;
+				
+				if (repliesCount==repliesExpected) {
+					long roundTime = System.currentTimeMillis();
+					displayMessage("Bidding round "+biddingRound+" finished at "+roundTime);
+					biddingRound++;
+					repliesCount=0;
+				}
+		
 				if (reply.getPerformative() == ACLMessage.PROPOSE) {
 					//this is an offer message
 
@@ -471,9 +518,10 @@ public class UserAgent extends Agent {
 
 						MakeOffer off = (MakeOffer)myAgent.getContentManager().extractContent(reply);
 
-						
-						displayMessage("Got offer");
-						
+						long receivedTime = System.currentTimeMillis();
+
+						displayMessage("Got offer at "+receivedTime);
+
 						//throws exception if we don't understand message
 
 						Iterator<Offer> itr = off.getAllOFFERINSTANCE();
@@ -498,12 +546,14 @@ public class UserAgent extends Agent {
 
 							} else {
 
-								OfferList ol = allOffers.get(currentRequest);
-
+								OfferList ol = allOffers.get(currentRequestID);
+								System.err.println("Adding Offer");
 								if (ol == null) {
+									System.err.println("Offer list is NULL");
 									ol = new OfferList<ReceivedOffer>();
 									ol.add(new ReceivedOffer (responder, myOffer));
 								} else {
+									System.err.println("Offer list is not NULL");
 									ol.addSorted(new ReceivedOffer (responder, myOffer));
 								}
 
@@ -525,7 +575,7 @@ public class UserAgent extends Agent {
 					//System.err.println("Conversation " + conv);
 
 				}
-				repliesCount++;
+				//repliesCount++;
 
 				//System.out.println("Rep no " + repliesCount +"/"+resourceAgents.size());
 
@@ -627,8 +677,19 @@ public class UserAgent extends Agent {
 
 		}
 
+		public void onStart () {
+			displayMessage ("Starting negotiation: " + System.currentTimeMillis());
+		}
+		
 		public int onEnd () {
 			displayMessage ("End time: " + System.currentTimeMillis());
+			writer.flush();
+			try {
+				myAgent.getContainerController().kill();
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return 0;
 		}
 

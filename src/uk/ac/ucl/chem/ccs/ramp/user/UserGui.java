@@ -86,7 +86,7 @@ public class UserGui extends JFrame {
 
 						
 						JScrollPane scrollPane = new JScrollPane();
-						scrollPane.setBounds(-1, 7, 773, 220);
+						scrollPane.setBounds(10, 7, 773, 220);
 						panel_1.add(scrollPane);
 						
 						table = new JTable();
@@ -98,12 +98,12 @@ public class UserGui extends JFrame {
 								
 								{
 									JPanel buttonPane = new JPanel();
-									buttonPane.setBounds(0, 239, 772, 41);
+									buttonPane.setBounds(10, 239, 773, 41);
 									panel_1.add(buttonPane);
 									buttonPane.setLayout(null);
 									
 									JButton btnNewButton = new JButton("Load");
-									btnNewButton.setBounds(10, 0, 99, 35);
+									btnNewButton.setBounds(0, 0, 99, 35);
 									buttonPane.add(btnNewButton);
 									btnNewButton.addActionListener(new ActionListener() {
 										public void actionPerformed(ActionEvent e) {
@@ -181,7 +181,7 @@ public class UserGui extends JFrame {
 								}
 								
 								JScrollPane scrollPane_1 = new JScrollPane();
-								scrollPane_1.setBounds(-1, 284, 773, 213);
+								scrollPane_1.setBounds(10, 284, 773, 220);
 								panel_1.add(scrollPane_1);
 								
 								textArea = new JTextArea();

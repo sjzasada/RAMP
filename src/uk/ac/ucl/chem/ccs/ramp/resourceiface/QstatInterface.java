@@ -11,6 +11,7 @@ package uk.ac.ucl.chem.ccs.ramp.resourceiface;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -43,9 +44,16 @@ public class QstatInterface implements ResourceInterface {
 		message="";
 		int cpucount = c.getTOTALCORES();
 		String when = c.getNOTBEFORE();
-		
+		//System.err.println("ERROR DATE "+when);
 		Date d = new Date();
-		long l = d.parse(when);
+		SimpleDateFormat parserSDF=new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+		try{ 
+		d=parserSDF.parse(when);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		long l = d.getTime();
 		long n = System.currentTimeMillis();
 		
 		l=(l-n)/1000;
@@ -67,6 +75,7 @@ public class QstatInterface implements ResourceInterface {
 	            	//System.err.println("Line" + line);
 	            	if (cnt==0) {
 	            		factor=Float.parseFloat(line);
+	            		message=message+"Machine Load: "+factor+"\n";
 	            	} else if (cnt==1) {
 	            		result=line;
 	            	}
@@ -95,7 +104,7 @@ public class QstatInterface implements ResourceInterface {
 
 
 		    
-		    if (previousprice>=requestprice) {
+		    if (previousprice==requestprice) {
 		    	message=message+"We're already offering a winning price - no bid\n";
 		    	return null;//if we've already got a winning offer, don't bid
 		    }
@@ -107,7 +116,10 @@ public class QstatInterface implements ResourceInterface {
 	       int decreaseSteps=4;
 	       factor=1.0f-factor;//%unallocated
 	       float decrement=(price-minPrice)/decreaseSteps*factor;
-	       message=message+"decrement is "+decrement+"\n";
+	       
+	       
+	       
+	       message=message+"decrement is "+decrement+" at"+System.currentTimeMillis()+"\n";
 	       offerprice=price;
 	       
 		   offerprice=Math.round(requestprice-decrement);
@@ -149,7 +161,14 @@ public class QstatInterface implements ResourceInterface {
 		String when = c.getONOTBEFORE();
 		
 		Date d = new Date();
-		long l = d.parse(when);
+		SimpleDateFormat parserSDF=new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+		try{ 
+		d=parserSDF.parse(when);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		long l = d.getTime();		
 		long n = System.currentTimeMillis();
 		
 		l=(l-n)/1000;

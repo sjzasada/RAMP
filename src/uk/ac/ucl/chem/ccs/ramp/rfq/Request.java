@@ -72,7 +72,7 @@ public class Request {
 	}
 	
 	public void setCPUCost (int c) {
-		RequestForQuotation.Request rfqr = of.createRequestForQuotationRequest();
+		RequestForQuotation.Request rfqr = rfq.getRequest();
 		rfqr.setCPUHourCost(BigInteger.valueOf(c));
 		rfq.setRequest(rfqr);
 	}

@@ -9,6 +9,7 @@
  */
 package uk.ac.ucl.chem.ccs.ramp.user;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import uk.ac.ucl.chem.ccs.ramp.rfq.Request;
@@ -28,8 +29,20 @@ public class RequestEvaluator {
 		//offer things to test
 		int offerCost = Integer.parseInt(myOffer.getOCPUHOURCOST());
 		int offerCPU = myOffer.getOTOTALCORES();
-		Date offerStart = new Date(myOffer.getONOTBEFORE());
-		Date offerEnd = new Date(myOffer.getODEADLINE());
+		
+		Date offerStart = new Date();
+		Date offerEnd = new Date();
+		
+		SimpleDateFormat parserSDF=new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+		try{ 
+			//System.err.println("OFFER DATA IS "+myOffer.getONOTBEFORE());
+			
+			offerStart=parserSDF.parse(myOffer.getONOTBEFORE());
+			offerEnd=parserSDF.parse(myOffer.getODEADLINE());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		
 		if (offerCost > cost) {
 			meetsReq=false;
@@ -57,7 +70,7 @@ public class RequestEvaluator {
 		int cpucosta = Integer.parseInt(offer.getOCPUHOURCOST());
 		int cpucostb = Integer.parseInt(offer2.getOCPUHOURCOST());
 		
-		if (cpucosta > cpucostb) {
+		if (cpucosta < cpucostb) {
 			return true;
 		}
 		
