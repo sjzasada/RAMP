@@ -1,6 +1,0 @@
-set term postscript 
-set output "plotexp.eps"
-set data style lines
-set nokey
-set title "Hub based network with 1000 nodes"
-plot	"graphS00000000.dat" lt rgb "green"
